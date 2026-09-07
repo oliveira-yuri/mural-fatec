@@ -2065,7 +2065,7 @@ Expected: FAIL — `@/lib/publicacoes/consultas` não encontrado.
 
 ```ts
 // src/lib/publicacoes/consultas.ts
-import { and, count, eq, gt } from 'drizzle-orm'
+import { and, count, eq, gt, isNotNull } from 'drizzle-orm'
 import type { Db } from '@/lib/db/client'
 import { publicacoes } from '@/lib/db/schema'
 import { ordenarMural } from '@/lib/publicacoes/ordenacao'
@@ -2085,9 +2085,20 @@ function achatar(linha: NonNullable<LinhaCrua>): PublicacaoDoMural {
   return { ...resto, cursos: cursos.map((c) => c.curso) }
 }
 
-/** Condição única de "está no mural agora". Usada por toda listagem. */
+/**
+ * Condição única de "está no mural agora". Usada por toda listagem.
+ *
+ * `publicadoEm` entra na condição porque a ordenação depende dele e a coluna
+ * é nulável. Uma linha publicada sem data de publicação é dado malformado:
+ * some da listagem em silêncio, em vez de derrubar a home com um erro de
+ * leitura de nulo. A garantia de escrita virá do painel, no Plano 2.
+ */
 function vigente(agora: Date) {
-  return and(eq(publicacoes.status, 'publicado'), gt(publicacoes.expiraEm, agora))
+  return and(
+    eq(publicacoes.status, 'publicado'),
+    isNotNull(publicacoes.publicadoEm),
+    gt(publicacoes.expiraEm, agora),
+  )
 }
 
 export async function listarMural(
