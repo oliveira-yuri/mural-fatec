@@ -45,6 +45,10 @@ describe('listarMural', () => {
     const itens = await listarMural(ctx.db, agora, 3)
     expect(itens).toHaveLength(3)
   })
+
+  it('devolve lista vazia quando o limite é zero', async () => {
+    expect(await listarMural(ctx.db, agora, 0)).toHaveLength(0)
+  })
 })
 
 describe('listarPorTipo', () => {
