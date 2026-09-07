@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import css from './Navegacao.module.css'
 
 const SECOES = [
@@ -15,14 +16,14 @@ export function Navegacao({ ativo }: { ativo: string }) {
         {SECOES.map((s) => {
           const atual = s.href === ativo
           return (
-            <a
+            <Link
               key={s.href}
               href={s.href}
               className={atual ? css.atual : undefined}
               aria-current={atual ? 'page' : undefined}
             >
               {s.rotulo}
-            </a>
+            </Link>
           )
         })}
       </div>

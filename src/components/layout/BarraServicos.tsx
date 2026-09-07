@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import css from './BarraServicos.module.css'
 
 const SERVICOS = [
@@ -16,7 +17,7 @@ export function BarraServicos() {
           <a key={s.rotulo} href={s.href}>{s.rotulo}</a>
         ))}
         <a href="#" className={css.fim}>Acessibilidade</a>
-        <a href="/entrar">Entrar para publicar</a>
+        <Link href="/entrar">Entrar para publicar</Link>
       </nav>
     </div>
   )

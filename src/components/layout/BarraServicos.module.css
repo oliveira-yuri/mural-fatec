@@ -10,6 +10,6 @@
   font-size: 12.5px;
 }
 
-.faixa a:hover { color: #fff; text-decoration: underline; }
+.faixa a:hover { color: var(--papel); text-decoration: underline; }
 
 .fim { margin-left: auto; }

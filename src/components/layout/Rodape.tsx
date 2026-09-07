@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import css from './Rodape.module.css'
 
 const COLUNAS = [
@@ -48,7 +49,11 @@ export function Rodape() {
               <ul>
                 {coluna.links.map((l) => (
                   <li key={l.rotulo} className="narrow">
-                    <a href={l.href}>{l.rotulo}</a>
+                    {l.href === '#' ? (
+                      <a href={l.href}>{l.rotulo}</a>
+                    ) : (
+                      <Link href={l.href}>{l.rotulo}</Link>
+                    )}
                   </li>
                 ))}
               </ul>

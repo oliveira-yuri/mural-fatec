@@ -61,7 +61,7 @@
 .busca button {
   border: 0;
   background: var(--ardosia);
-  color: #fff;
+  color: var(--papel);
   padding: 0 17px;
   cursor: pointer;
   font: inherit;
