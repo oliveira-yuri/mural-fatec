@@ -1,6 +1,8 @@
+import { addDays } from 'date-fns'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { criarBancoDeTeste } from './ajuda/banco'
 import { semear } from '@/lib/db/seed'
+import { publicacoes, setores, usuarios } from '@/lib/db/schema'
 import { listarMural, listarPorTipo, buscarPorSlug, contarVigentes } from '@/lib/publicacoes/consultas'
 
 const agora = new Date('2026-09-08T12:00:00Z')
@@ -78,5 +80,29 @@ describe('buscarPorSlug', () => {
 describe('contarVigentes', () => {
   it('conta só o que está no mural agora', async () => {
     expect(await contarVigentes(ctx.db, agora)).toBe(8)
+  })
+})
+
+describe('listarMural — dado malformado', () => {
+  it('não devolve, e não lança, uma publicação "publicado" sem publicadoEm', async () => {
+    const [setor] = await ctx.db.select().from(setores).limit(1)
+    const [autor] = await ctx.db.select().from(usuarios).limit(1)
+
+    await ctx.db.insert(publicacoes).values({
+      slug: 'publicacao-malformada-sem-data-de-publicacao',
+      tipo: 'aviso',
+      titulo: 'Publicação malformada',
+      resumo: 'Status publicado mas sem publicadoEm — não deve derrubar a home.',
+      corpo: 'Linha inserida direto para simular dado malformado.',
+      setorId: setor.id,
+      autorId: autor.id,
+      status: 'publicado',
+      publicadoEm: null,
+      expiraEm: addDays(agora, 10),
+    })
+
+    await expect(listarMural(ctx.db, agora)).resolves.not.toThrow()
+    const itens = await listarMural(ctx.db, agora)
+    expect(itens.some((i) => i.slug === 'publicacao-malformada-sem-data-de-publicacao')).toBe(false)
   })
 })
