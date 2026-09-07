@@ -1,0 +1,11 @@
+.contagem { font-size: 14px; color: var(--cinza); padding-top: 20px; margin: 0; }
+
+.secao { padding: 30px 0 6px; }
+
+.lavada { background: var(--lavado); padding: 44px 0; margin-top: 34px; }
+
+.lista { border-top: 1px solid var(--regra); }
+
+.doisPorLinha { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+
+.comunidade { display: grid; grid-template-columns: 1.4fr 1fr; gap: 34px; }

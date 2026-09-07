@@ -1,0 +1,55 @@
+.destaque { display: block; }
+
+.figura { margin: 0; }
+
+/* Crédito de fotografia: a spec §6 o nomeia como traço definidor da
+   notícia — é o único tipo que carrega crédito de foto. */
+.creditoFoto { font-size: 12.5px; color: var(--cinza); margin: 7px 0 0; }
+
+.foto {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: var(--raio-imagem);
+}
+
+.titulo {
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.19;
+  letter-spacing: -0.032em;
+  color: var(--ardosia);
+  margin: 16px 0 11px;
+  max-width: 21ch;
+  transition: color 0.15s ease;
+}
+
+.destaque:hover .titulo { color: var(--tijolo); }
+
+.resumo { font-size: 16.5px; line-height: 1.55; color: var(--cinza); margin: 0 0 14px; max-width: 52ch; }
+
+.credito {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--cinza);
+  border-top: 1px solid var(--regra);
+  padding-top: 12px;
+  margin: 0;
+}
+
+.credito strong { color: var(--tinta); font-weight: 600; }
+
+.compacta { display: block; padding: 14px 0; border-bottom: 1px solid var(--regra); }
+
+.procedencia { display: block; font-size: 13.5px; color: var(--cinza); margin-bottom: 5px; }
+
+.manchete {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.34;
+  letter-spacing: -0.012em;
+  margin: 0;
+  transition: color 0.15s ease;
+}
+
+.compacta:hover .manchete { color: var(--tijolo); }

@@ -1,0 +1,608 @@
+{
+  "id": "10440631-7851-47cf-951e-4f553a14604c",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.cursos": {
+      "name": "cursos",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sigla": {
+          "name": "sigla",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "cursos_slug_unique": {
+          "name": "cursos_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacoes": {
+      "name": "publicacoes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_publicacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titulo": {
+          "name": "titulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "resumo": {
+          "name": "resumo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "corpo": {
+          "name": "corpo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor_id": {
+          "name": "autor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "imagem_url": {
+          "name": "imagem_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "imagem_alt": {
+          "name": "imagem_alt",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "credito_foto": {
+          "name": "credito_foto",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "anexos": {
+          "name": "anexos",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link_externo": {
+          "name": "link_externo",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "destaque": {
+          "name": "destaque",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "status": {
+          "name": "status",
+          "type": "status_publicacao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'rascunho'"
+        },
+        "publicado_em": {
+          "name": "publicado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "expira_em": {
+          "name": "expira_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "urgencia": {
+          "name": "urgencia",
+          "type": "urgencia_aviso",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "documento_numero": {
+          "name": "documento_numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "inicio_em": {
+          "name": "inicio_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fim_em": {
+          "name": "fim_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "local": {
+          "name": "local",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "modalidade": {
+          "name": "modalidade",
+          "type": "modalidade_evento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link_inscricao": {
+          "name": "link_inscricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vagas_restantes": {
+          "name": "vagas_restantes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "prazo_final": {
+          "name": "prazo_final",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "abre_em": {
+          "name": "abre_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "link_acao": {
+          "name": "link_acao",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pessoas_citadas": {
+          "name": "pessoas_citadas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "busca_tsv": {
+          "name": "busca_tsv",
+          "type": "tsvector",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "atualizado_em": {
+          "name": "atualizado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "publicacoes_slug_idx": {
+          "name": "publicacoes_slug_idx",
+          "columns": [
+            {
+              "expression": "slug",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_mural_idx": {
+          "name": "publicacoes_mural_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "expira_em",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "publicacoes_busca_idx": {
+          "name": "publicacoes_busca_idx",
+          "columns": [
+            {
+              "expression": "busca_tsv",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "gin",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "publicacoes_setor_id_setores_id_fk": {
+          "name": "publicacoes_setor_id_setores_id_fk",
+          "tableFrom": "publicacoes",
+          "tableTo": "setores",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "publicacoes_autor_id_usuarios_id_fk": {
+          "name": "publicacoes_autor_id_usuarios_id_fk",
+          "tableFrom": "publicacoes",
+          "tableTo": "usuarios",
+          "columnsFrom": [
+            "autor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.publicacoes_cursos": {
+      "name": "publicacoes_cursos",
+      "schema": "",
+      "columns": {
+        "publicacao_id": {
+          "name": "publicacao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "curso_id": {
+          "name": "curso_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "publicacoes_cursos_publicacao_id_publicacoes_id_fk": {
+          "name": "publicacoes_cursos_publicacao_id_publicacoes_id_fk",
+          "tableFrom": "publicacoes_cursos",
+          "tableTo": "publicacoes",
+          "columnsFrom": [
+            "publicacao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "publicacoes_cursos_curso_id_cursos_id_fk": {
+          "name": "publicacoes_cursos_curso_id_cursos_id_fk",
+          "tableFrom": "publicacoes_cursos",
+          "tableTo": "cursos",
+          "columnsFrom": [
+            "curso_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "publicacoes_cursos_publicacao_id_curso_id_pk": {
+          "name": "publicacoes_cursos_publicacao_id_curso_id_pk",
+          "columns": [
+            "publicacao_id",
+            "curso_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.setores": {
+      "name": "setores",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "slug": {
+          "name": "slug",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "setores_slug_unique": {
+          "name": "setores_slug_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "slug"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.usuarios": {
+      "name": "usuarios",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "senha_hash": {
+          "name": "senha_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel": {
+          "name": "papel",
+          "type": "papel_usuario",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'colaborador'"
+        },
+        "setor_id": {
+          "name": "setor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ativo": {
+          "name": "ativo",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "usuarios_setor_id_setores_id_fk": {
+          "name": "usuarios_setor_id_setores_id_fk",
+          "tableFrom": "usuarios",
+          "tableTo": "setores",
+          "columnsFrom": [
+            "setor_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "usuarios_email_unique": {
+          "name": "usuarios_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.modalidade_evento": {
+      "name": "modalidade_evento",
+      "schema": "public",
+      "values": [
+        "presencial",
+        "online",
+        "hibrido"
+      ]
+    },
+    "public.papel_usuario": {
+      "name": "papel_usuario",
+      "schema": "public",
+      "values": [
+        "colaborador",
+        "editor",
+        "administrador"
+      ]
+    },
+    "public.status_publicacao": {
+      "name": "status_publicacao",
+      "schema": "public",
+      "values": [
+        "rascunho",
+        "em_revisao",
+        "publicado",
+        "arquivado"
+      ]
+    },
+    "public.tipo_publicacao": {
+      "name": "tipo_publicacao",
+      "schema": "public",
+      "values": [
+        "aviso",
+        "evento",
+        "prazo",
+        "noticia"
+      ]
+    },
+    "public.urgencia_aviso": {
+      "name": "urgencia_aviso",
+      "schema": "public",
+      "values": [
+        "informativo",
+        "importante",
+        "urgente"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

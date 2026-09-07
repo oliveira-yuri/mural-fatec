@@ -1,0 +1,101 @@
+/* Grid de uma célula só: o véu é o único item de verdade da grade — a foto
+   sai do fluxo (position: absolute; inset: 0) e só preenche a área que o
+   véu já determinou, em vez de disputar a altura da linha com ele.
+   Isso importa porque `height: 100%` num item de grid cuja linha tem altura
+   automática NÃO resolve contra um valor definido — o CSS trata a
+   porcentagem como indefinida e a imagem volta a usar a proporção
+   intrínseca dela. Testei a primeira versão desta correção (fundo como
+   item de grid comum, com `height: 100%`) com uma imagem quadrada de
+   verificação: o hero inchou para 1280px de altura (a largura inteira,
+   porque a imagem é 1:1) em vez de ficar em 400px. Qualquer foto real
+   também estouraria — nenhuma tem a proporção ultra-larga de 1280:400, e a
+   maioria (retrato, 4:3, 16:9) resultaria em algo entre 720px e 1280px de
+   altura no lugar de 400px. Com a foto em position: absolute, ela nunca
+   disputa a altura da linha — só preenche, via object-fit: cover, a altura
+   que o véu (o item real da grade) já fixou. */
+.hero {
+  position: relative;
+  display: grid;
+  background: var(--ardosia-escura);
+  min-height: 400px;
+}
+
+/* Um elemento position:absolute pinta DEPOIS de um elemento estático no
+   mesmo contexto de empilhamento, mesmo vindo antes no DOM — e opacity < 1
+   cria contexto de empilhamento próprio, então a ordem do DOM não bastava
+   para prever isto. Sem z-index explícito, a foto (agora absolute) pintava
+   por cima do véu (estático), escondendo título, resumo e botões e
+   bloqueando o clique em "Ler o comunicado". z-index restaura a ordem
+   visual original sem tirar o véu do fluxo (que é o que faz o hero
+   calcular a altura por ele). */
+.fundo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.44;
+}
+
+.veu {
+  grid-area: 1 / 1;
+  align-self: end;
+  position: relative;
+  z-index: 1;
+  /* Piso sólido + gradiente, e não só o gradiente. O gradiente sozinho
+     chegava a alpha 0 no topo do véu, então o contraste do texto dependia da
+     foto: com a imagem escura do seed o título branco passava folgado, mas
+     com uma foto clara (pátio ao sol, parede branca — spec §16.4 diz que
+     fotos reais vão entrar) o fundo efetivo sob o título subia para ~#8D979C
+     e o branco caía para 2,9:1, reprovado no AA que a §12 exige. O piso de
+     0.80 garante o pior caso possível (foto branca chapada, com a .fundo em
+     opacity 0.44): título branco 7,7:1, resumo 6,4:1, linha de identificação
+     em --tijolo-claro 4,6:1 — os três acima de 4,5:1 independentemente da
+     foto. Somado ao gradiente, o pé do véu chega a 0,97 de opacidade. */
+  background:
+    linear-gradient(to top, rgba(51, 69, 78, 0.85) 12%, rgba(51, 69, 78, 0)),
+    rgba(51, 69, 78, 0.8);
+  padding-top: 66px;
+  padding-bottom: 34px;
+}
+
+.caixa { max-width: 614px; border-left: 4px solid var(--tijolo); padding-left: 22px; }
+
+.identificacao { font-size: 12.5px; font-weight: 600; color: var(--tijolo-claro); margin: 0 0 12px; }
+
+.titulo {
+  font-size: 38px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.033em;
+  color: var(--papel);
+  margin: 0 0 13px;
+}
+
+.resumo {
+  font-size: 17.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+  margin: 0 0 21px;
+  max-width: 56ch;
+}
+
+.acoes { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.acao {
+  display: inline-block;
+  background: var(--tijolo);
+  color: var(--papel);
+  padding: 12px 20px;
+  border-radius: var(--raio-controle);
+  font-size: 14.5px;
+  font-weight: 600;
+  transition: background 0.18s ease;
+}
+
+.acao:hover { background: var(--tijolo-escuro); }
+
+.claro { background: var(--papel); color: var(--ardosia-escura); }
+
+.claro:hover { background: var(--regra); }

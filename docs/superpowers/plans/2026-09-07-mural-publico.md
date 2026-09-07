@@ -31,10 +31,22 @@ Requisitos que valem para **todas** as tarefas. Valores copiados da spec.
 | `--regra` | `#D5DBDE` |
 | `--lavado` | `#F2F4F5` |
 | `--papel` | `#FFFFFF` |
+| `--tijolo-claro` | `#F3B9BA` | o tijolo clareado, para texto de marca sobre fundo escuro |
 
 **Tipografia** — Archivo para títulos, navegação, botões e rótulos; Archivo Narrow para listas densas (datas, resumos de linha, metadados, rodapé). Carregadas por `next/font/google`, nunca por `<link>` ou `@import`.
 
 **Forma** — botões, campos e fichas com raio 7px; imagens 9px; selos e indicadores 4 a 6px; seções, filetes, listas e tabelas **sem raio**. Sem sombra de elevação.
+
+**Navegação interna usa `<Link>` do `next/link`.** `<a>` fica só para link externo,
+âncora e placeholder (`href="#"`). O `<Link>` renderiza um `<a href>` no HTML, então
+continua funcionando com JavaScript desligado — a navegação instantânea é ganho puro, sem
+perda. É também o que o `@next/next/no-html-link-for-pages` cobra, e manter o lint limpo é o
+que faz ele proteger os links seguintes.
+
+**Nenhum hex dentro de CSS Module.** Branco é `var(--papel)`, não `#fff`. O teste da
+Tarefa 1 trava a paleta lendo apenas o `globals.css`; um hex escrito num componente escapa
+dele e é como uma paleta começa a divergir. Variações com transparência
+(`rgba(255,255,255,.72)`) são permitidas, porque não existem como token.
 
 **Regra do hover** — nenhuma informação pode existir só no hover. Todo texto, data, autor e rótulo é legível com a página parada. Nesta fase o hover só muda cor de título.
 
@@ -42,7 +54,7 @@ Requisitos que valem para **todas** as tarefas. Valores copiados da spec.
 
 **Texto alternativo** — se `imagem_url` existe, `imagem_alt` é obrigatório. Validado no schema Zod, não por convenção.
 
-**Datas por extenso** no texto visível ("terça-feira, 23 de setembro"), sempre com o formato de máquina em `<time datetime="...">`.
+**Datas por extenso** no texto visível ("quarta-feira, 23 de setembro"), sempre com o formato de máquina em `<time datetime="...">`.
 
 **Fuso horário** — `America/Sao_Paulo` para toda conta de dias. O servidor pode rodar em UTC; nenhuma diferença de data pode depender disso.
 
@@ -128,7 +140,7 @@ mural-fatec/
 Cria o projeto, os tokens de design, as fontes e o arranjo de testes. Ao final, `npm run dev` mostra uma página usando a paleta e a tipografia corretas, e `npm test` roda.
 
 **Files:**
-- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`, `.env.example`
+- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`
 - Create: `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`
 - Test: `tests/unidade/fundacao.test.ts`
 
@@ -139,15 +151,16 @@ Cria o projeto, os tokens de design, as fontes e o arranjo de testes. Ao final, 
 - [ ] **Step 1: Criar o projeto Next.js**
 
 ```bash
-npx create-next-app@latest . --typescript --app --no-tailwind --no-src-dir --import-alias "@/*" --eslint --use-npm
+npx create-next-app@latest . --typescript --app --no-tailwind --src-dir --import-alias "@/*" --eslint --use-npm
 ```
 
 Responder **não** para Turbopack se perguntado. O comando reclama de diretório não vazio: confirmar sobrescrita, os arquivos existentes (`docs/`, `.gitignore`, `.claude/`) são preservados.
 
-- [ ] **Step 2: Mover o código para `src/` e instalar as dependências**
+- [ ] **Step 2: Instalar as dependências**
+
+Com `--src-dir`, o create-next-app já cria `src/app` e mapeia `"@/*": ["./src/*"]` no tsconfig. Conferir esse mapeamento antes de seguir: sem ele, todo import `@/lib/...` quebra.
 
 ```bash
-mkdir -p src && mv app src/app
 npm install drizzle-orm postgres zod date-fns date-fns-tz react-markdown remark-gfm
 npm install -D drizzle-kit vitest @vitejs/plugin-react vite-tsconfig-paths @testing-library/react @testing-library/jest-dom jsdom @electric-sql/pglite dotenv tsx
 ```
@@ -169,6 +182,7 @@ describe('tokens de design', () => {
     ['--ardosia-escura', '#33454E'],
     ['--tijolo', '#B22D30'],
     ['--tijolo-escuro', '#8E2326'],
+    ['--tijolo-claro', '#F3B9BA'],
     ['--tinta', '#1E272C'],
     ['--cinza', '#5A6A72'],
     ['--regra', '#D5DBDE'],
@@ -228,6 +242,11 @@ Expected: FAIL — `globals.css` ainda tem o conteúdo padrão do create-next-ap
   --ardosia-escura: #33454E;
   --tijolo: #B22D30;
   --tijolo-escuro: #8E2326;
+  /* O tijolo clareado, legível sobre a ardósia escura. Existe porque o
+     vermelho institucional cheio não tem contraste suficiente em fundo
+     escuro, e sem ele a linha de identificação do hero vira branco
+     comum e perde o vínculo com a marca. */
+  --tijolo-claro: #F3B9BA;
   --tinta: #1E272C;
   --cinza: #5A6A72;
   --regra: #D5DBDE;
@@ -387,7 +406,7 @@ O mural escreve data por extenso em todo lugar. Centralizar aqui evita que cada 
 **Interfaces:**
 - Consumes: nada
 - Produces:
-  - `formatarDataExtenso(d: Date): string` → `"terça-feira, 23 de setembro"`
+  - `formatarDataExtenso(d: Date): string` → `"quarta-feira, 23 de setembro"`
   - `formatarDataCurta(d: Date): string` → `"4 de setembro"`
   - `formatarDataCompleta(d: Date): string` → `"2 de setembro de 2026"`
   - `formatarHorario(inicio: Date, fim?: Date | null): string` → `"19h30 às 21h"`
@@ -413,7 +432,7 @@ const fimEvento = new Date('2026-09-24T00:00:00Z') // 21h00 em São Paulo
 
 describe('formatarDataExtenso', () => {
   it('escreve dia da semana, dia e mês', () => {
-    expect(formatarDataExtenso(evento)).toBe('terça-feira, 23 de setembro')
+    expect(formatarDataExtenso(evento)).toBe('quarta-feira, 23 de setembro')
   })
 })
 
@@ -880,7 +899,7 @@ Tabelas, enums, coluna de busca gerada e migração. A tabela `usuarios` entra a
 - Produces:
   - Tabelas `setores`, `cursos`, `usuarios`, `publicacoes`, `publicacoesCursos`
   - Enums `tipoPublicacao`, `statusPublicacao`, `urgenciaAviso`, `modalidadeEvento`, `papelUsuario`
-  - `db` e `type Db` de `@/lib/db/client`
+  - `db` (conexão real) e `type Db` (genérico de driver) de `@/lib/db/client`
   - `criarBancoDeTeste(): Promise<{ db, cliente, encerrar }>` de `tests/integracao/ajuda/banco`
 
 - [ ] **Step 1: Escrever o schema**
@@ -996,6 +1015,7 @@ export const publicacoesCursos = pgTable(
 ```ts
 // src/lib/db/client.ts
 import { drizzle } from 'drizzle-orm/postgres-js'
+import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
 import postgres from 'postgres'
 import * as schema from './schema'
 
@@ -1005,7 +1025,20 @@ if (!url) throw new Error('DATABASE_URL não definida. Copie .env.example para .
 const conexao = postgres(url, { prepare: false })
 
 export const db = drizzle(conexao, { schema })
-export type Db = typeof db
+
+/**
+ * Tipo do banco independente de driver. Toda consulta recebe este tipo para
+ * que os testes passem uma instância PGlite e a aplicação passe a conexão
+ * postgres-js, sem duas assinaturas paralelas.
+ *
+ * `typeof db` NÃO serve aqui: amarra a assinatura ao postgres-js e faz o
+ * `tsc` recusar a instância PGlite dos testes de integração.
+ *
+ * Importe sempre como `import type { Db }`. Um import de tipo é apagado na
+ * compilação e não executa este módulo, que lança se DATABASE_URL faltar —
+ * o que quebraria os testes, que nunca precisam dessa variável.
+ */
+export type Db = PgDatabase<PgQueryResultHKT, typeof schema>
 ```
 
 ```ts
@@ -1044,14 +1077,31 @@ O drizzle-kit cria `busca_tsv` como coluna comum, porque não sabe gerar `GENERA
 ```sql
 ALTER TABLE "publicacoes" ADD COLUMN "busca_tsv" tsvector
   GENERATED ALWAYS AS (
-    setweight(to_tsvector('portuguese', coalesce("titulo", '')), 'A') ||
-    setweight(to_tsvector('portuguese', coalesce("resumo", '')), 'B') ||
-    setweight(to_tsvector('portuguese', coalesce("corpo", '')), 'C')
+    setweight(to_tsvector('portuguese', translate(coalesce("titulo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'A') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("resumo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'B') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("corpo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'C')
   ) STORED;
 --> statement-breakpoint
 ```
 
 O peso A no título faz o título valer mais que o corpo no ranking da busca.
+
+**Por que o `translate`:** o dicionário `portuguese` do Postgres **preserva acentos** —
+`to_tsvector('portuguese','calendário')` devolve `'calendári'`, e buscar `calendario` sem
+acento não acha nada. Aluno brasileiro digita sem acento, então isso quebraria a busca no
+uso principal dela. A extensão `unaccent` resolveria, mas não existe no PGlite e não é
+`IMMUTABLE`, o que a proíbe dentro de coluna gerada. `translate` é `IMMUTABLE`, dispensa
+extensão e se comporta igual no PGlite e no Supabase.
+
+**O que continua sem casar:** o par `-ção`/`-ções`. `inscrições` não acha `inscrição`, nem
+antes nem depois da dobra — limitação do stemmer Snowball, não regressão. Plurais normais
+funcionam: `disciplinas` acha `disciplina`, `estágios` acha `estagio`.
 
 - [ ] **Step 5: Escrever a ajuda de banco de teste**
 
@@ -1199,6 +1249,7 @@ O banco aceita quase tudo, porque as colunas específicas de tipo são opcionais
 **Interfaces:**
 - Consumes: nada
 - Produces:
+  - `semAcento(texto: string): string` — tira acento preservando a letra
   - `gerarSlug(titulo: string): string`
   - `criarSchemaPublicacao(agora: Date)` — devolve o schema Zod; recebe `agora` para que a validação de data futura seja testável sem depender do relógio
   - `type EntradaPublicacao = z.infer<ReturnType<typeof criarSchemaPublicacao>>`
@@ -1208,7 +1259,18 @@ O banco aceita quase tudo, porque as colunas específicas de tipo são opcionais
 ```ts
 // tests/unidade/slug.test.ts
 import { describe, it, expect } from 'vitest'
-import { gerarSlug } from '@/lib/publicacoes/slug'
+import { gerarSlug, semAcento } from '@/lib/publicacoes/slug'
+
+describe('semAcento', () => {
+  it('remove acento preservando a letra', () => {
+    expect(semAcento('Alteração no calendário acadêmico'))
+      .toBe('Alteracao no calendario academico')
+  })
+
+  it('não mexe em texto sem acento', () => {
+    expect(semAcento('monitoria remunerada')).toBe('monitoria remunerada')
+  })
+})
 
 describe('gerarSlug', () => {
   it('remove acentos e deixa em minúsculas', () => {
@@ -1243,10 +1305,17 @@ Expected: FAIL — módulo não encontrado.
 
 ```ts
 // src/lib/publicacoes/slug.ts
+/**
+ * Remove acentos preservando a letra. A Tarefa 14 reusa isto para dobrar o
+ * termo de busca do mesmo jeito que a coluna busca_tsv dobra o conteúdo — se
+ * os dois lados não dobrarem igual, a busca não casa.
+ */
+export function semAcento(texto: string): string {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
 export function gerarSlug(titulo: string): string {
-  return titulo
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  return semAcento(titulo)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -2014,7 +2083,7 @@ Expected: FAIL — `@/lib/publicacoes/consultas` não encontrado.
 
 ```ts
 // src/lib/publicacoes/consultas.ts
-import { and, count, eq, gt } from 'drizzle-orm'
+import { and, count, eq, gt, isNotNull } from 'drizzle-orm'
 import type { Db } from '@/lib/db/client'
 import { publicacoes } from '@/lib/db/schema'
 import { ordenarMural } from '@/lib/publicacoes/ordenacao'
@@ -2034,9 +2103,20 @@ function achatar(linha: NonNullable<LinhaCrua>): PublicacaoDoMural {
   return { ...resto, cursos: cursos.map((c) => c.curso) }
 }
 
-/** Condição única de "está no mural agora". Usada por toda listagem. */
+/**
+ * Condição única de "está no mural agora". Usada por toda listagem.
+ *
+ * `publicadoEm` entra na condição porque a ordenação depende dele e a coluna
+ * é nulável. Uma linha publicada sem data de publicação é dado malformado:
+ * some da listagem em silêncio, em vez de derrubar a home com um erro de
+ * leitura de nulo. A garantia de escrita virá do painel, no Plano 2.
+ */
 function vigente(agora: Date) {
-  return and(eq(publicacoes.status, 'publicado'), gt(publicacoes.expiraEm, agora))
+  return and(
+    eq(publicacoes.status, 'publicado'),
+    isNotNull(publicacoes.publicadoEm),
+    gt(publicacoes.expiraEm, agora),
+  )
 }
 
 export async function listarMural(
@@ -2049,7 +2129,9 @@ export async function listarMural(
     with: COM_RELACOES,
   })
   const ordenadas = ordenarMural(linhas.map(achatar), agora)
-  return limite ? ordenadas.slice(0, limite) : ordenadas
+  // `limite === 0` precisa devolver lista vazia, não a lista inteira.
+  // Um teste ternário sobre o número trata 0 como ausência de limite.
+  return limite === undefined ? ordenadas : ordenadas.slice(0, limite)
 }
 
 export async function listarPorTipo(
@@ -2232,7 +2314,7 @@ export function BarraServicos() {
   font-size: 12.5px;
 }
 
-.faixa a:hover { color: #fff; text-decoration: underline; }
+.faixa a:hover { color: var(--papel); text-decoration: underline; }
 
 .fim { margin-left: auto; }
 ```
@@ -2340,7 +2422,7 @@ export function Cabecalho() {
 .busca button {
   border: 0;
   background: var(--ardosia);
-  color: #fff;
+  color: var(--papel);
   padding: 0 17px;
   cursor: pointer;
   font: inherit;
@@ -2496,13 +2578,13 @@ export function Rodape() {
 
 .colunas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
 
-.titulo { font-size: 14px; font-weight: 600; color: #fff; margin: 0 0 13px; }
+.titulo { font-size: 14px; font-weight: 600; color: var(--papel); margin: 0 0 13px; }
 
 .pe ul { list-style: none; margin: 0; padding: 0; }
 
 .pe li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.45; }
 
-.pe a:hover { color: #fff; text-decoration: underline; }
+.pe a:hover { color: var(--papel); text-decoration: underline; }
 
 .fim {
   border-top: 1px solid rgba(255, 255, 255, 0.16);
@@ -2687,7 +2769,7 @@ describe('CardEvento', () => {
 
   it('escreve o dia da semana por extenso', () => {
     render(<CardEvento publicacao={evento} />)
-    expect(screen.getByText('terça-feira, 23 de setembro')).toBeInTheDocument()
+    expect(screen.getByText('quarta-feira, 23 de setembro')).toBeInTheDocument()
   })
 
   it('mostra horário, local e vagas', () => {
@@ -2700,6 +2782,11 @@ describe('CardEvento', () => {
   it('usa o texto alternativo da imagem', () => {
     render(<CardEvento publicacao={evento} />)
     expect(screen.getByAltText('Plateia no auditório do Bloco B')).toBeInTheDocument()
+  })
+
+  it('mostra "0 restantes" quando o evento lotou, em vez de omitir', () => {
+    render(<CardEvento publicacao={criarPublicacao({ ...evento, vagasRestantes: 0 })} />)
+    expect(screen.getByText('0 restantes')).toBeInTheDocument()
   })
 
   it('omite a linha de vagas quando o número não foi informado', () => {
@@ -2753,6 +2840,7 @@ describe('NotaComunidade', () => {
     titulo: 'Equipe de ADS fica em terceiro na Maratona',
     resumo: 'Vaga garantida na final nacional.',
     pessoasCitadas: 'Marcela Tsuchiya, Ithalo Bandeira e Renan Sposito',
+    creditoFoto: 'Assessoria de Comunicação',
     imagemUrl: 'https://exemplo.org/equipe.jpg',
     imagemAlt: 'Três estudantes com o certificado',
   })
@@ -2762,6 +2850,17 @@ describe('NotaComunidade', () => {
     expect(screen.getByAltText('Três estudantes com o certificado')).toBeInTheDocument()
     expect(screen.getByText('Vaga garantida na final nacional.')).toBeInTheDocument()
     expect(screen.getByText(/Marcela Tsuchiya/)).toBeInTheDocument()
+  })
+
+  it('na variante destaque, mostra o crédito da fotografia', () => {
+    render(<NotaComunidade publicacao={nota} variante="destaque" />)
+    expect(screen.getByText('Foto: Assessoria de Comunicação')).toBeInTheDocument()
+  })
+
+  it('omite o crédito quando a foto não tem um', () => {
+    const semCredito = criarPublicacao({ ...nota, creditoFoto: null })
+    render(<NotaComunidade publicacao={semCredito} variante="destaque" />)
+    expect(screen.queryByText(/^Foto:/)).not.toBeInTheDocument()
   })
 
   it('na variante compacta, mostra só manchete e procedência', () => {
@@ -2880,7 +2979,7 @@ export function LinhaAviso({ publicacao }: { publicacao: PublicacaoDoMural }) {
 .selo {
   display: inline-block;
   background: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
   padding: 4px 8px;
   border-radius: var(--raio-selo);
   font-size: 11.5px;
@@ -3066,7 +3165,7 @@ export function LinhaPrazo({
 .falta[data-estado='apertado'] {
   background: var(--tijolo);
   border-color: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
 }
 
 .falta[data-estado='vencido'] { opacity: 0.65; }
@@ -3106,7 +3205,14 @@ export function NotaComunidade({
   return (
     <a className={css.destaque} href={href}>
       {publicacao.imagemUrl ? (
-        <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+        <figure className={css.figura}>
+          <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+          {publicacao.creditoFoto ? (
+            <figcaption className={`narrow ${css.creditoFoto}`}>
+              Foto: {publicacao.creditoFoto}
+            </figcaption>
+          ) : null}
+        </figure>
       ) : null}
       <h3 className={css.titulo}>{publicacao.titulo}</h3>
       <p className={`narrow ${css.resumo}`}>{publicacao.resumo}</p>
@@ -3125,6 +3231,12 @@ export function NotaComunidade({
 ```css
 /* src/components/mural/NotaComunidade.module.css */
 .destaque { display: block; }
+
+.figura { margin: 0; }
+
+/* Crédito de fotografia: a spec §6 o nomeia como traço definidor da
+   notícia — é o único tipo que carrega crédito de foto. */
+.creditoFoto { font-size: 12.5px; color: var(--cinza); margin: 7px 0 0; }
 
 .foto {
   width: 100%;
@@ -3221,7 +3333,7 @@ O hero com o aviso mais importante do momento, seguido das quatro seções. É a
 ```ts
 // tests/unidade/destaque.test.ts
 import { describe, it, expect } from 'vitest'
-import { escolherDestaque } from '@/lib/publicacoes/destaque'
+import { montarSecoesDaHome } from '@/lib/publicacoes/secoes'
 import { criarPublicacao } from './ajuda/publicacao'
 
 describe('escolherDestaque', () => {
@@ -3275,6 +3387,76 @@ export function escolherDestaque(itens: PublicacaoDoMural[]): PublicacaoDoMural 
   if (urgente) return urgente
 
   return itens[0]
+}
+```
+
+- [ ] **Step 2b: Ordem dentro de uma seção, e a composição da home**
+
+A ordem do mural mistura tipos e vence a relevância temporal. Dentro de uma
+seção de um tipo só, a ordem natural é outra: a data que aquele tipo carrega.
+Um prazo que fecha antes vem antes; um evento que acontece antes vem antes.
+
+Sem isso, o critério da spec §1 não se cumpre. `ordenarMural` só prioriza um
+prazo quando faltam 7 dias ou menos; além disso ele cai na ordem por data de
+publicação. Com seis prazos e nenhum urgente, o que fecha em dez dias pode
+ficar em quinto lugar e ser cortado pelo `slice(0, 4)` — e o aluno não acha o
+prazo mais próximo na home, que é exatamente o que a spec promete.
+
+A composição da home também sai da página. Enquanto ela viver dentro de um
+Server Component que depende de banco, não há teste que a exercite, e foi por
+isso que esse buraco atravessou o plano inteiro sem ser notado.
+
+```ts
+// src/lib/publicacoes/secoes.ts
+import { escolherDestaque } from '@/lib/publicacoes/destaque'
+import type { PublicacaoDoMural, TipoPublicacao } from '@/lib/publicacoes/tipos'
+
+const DISTANTE = Number.MAX_SAFE_INTEGER
+
+/** Chave de ordem de cada tipo, sempre crescente. */
+const CHAVE: Record<TipoPublicacao, (p: PublicacaoDoMural) => number> = {
+  prazo: (p) => p.prazoFinal?.getTime() ?? DISTANTE,
+  evento: (p) => p.inicioEm?.getTime() ?? DISTANTE,
+  aviso: (p) => -(p.publicadoEm?.getTime() ?? 0),
+  noticia: (p) => -(p.publicadoEm?.getTime() ?? 0),
+}
+
+/**
+ * Ordem dentro de uma seção de um tipo só — diferente da ordem do mural.
+ * Prazo pela data-limite, evento pela data em que acontece, aviso e notícia
+ * do mais recente ao mais antigo. Item sem a data do seu tipo vai para o fim,
+ * em vez de embaralhar os que têm.
+ */
+export function ordenarSecao(
+  itens: readonly PublicacaoDoMural[],
+  tipo: TipoPublicacao,
+): PublicacaoDoMural[] {
+  const chave = CHAVE[tipo]
+  return [...itens].sort((a, b) => chave(a) - chave(b))
+}
+
+export type SecoesDaHome = {
+  destaque: PublicacaoDoMural | null
+  avisos: PublicacaoDoMural[]
+  eventos: PublicacaoDoMural[]
+  prazos: PublicacaoDoMural[]
+  noticias: PublicacaoDoMural[]
+}
+
+/** O que a home mostra, a partir da lista já vigente e ordenada. */
+export function montarSecoesDaHome(itens: PublicacaoDoMural[]): SecoesDaHome {
+  const destaque = escolherDestaque(itens)
+  const restantes = itens.filter((i) => i.id !== destaque?.id)
+  const doTipo = (t: TipoPublicacao) =>
+    ordenarSecao(restantes.filter((i) => i.tipo === t), t)
+
+  return {
+    destaque,
+    avisos: doTipo('aviso').slice(0, 4),
+    eventos: doTipo('evento').slice(0, 2),
+    prazos: doTipo('prazo').slice(0, 4),
+    noticias: doTipo('noticia'),
+  }
 }
 ```
 
@@ -3409,14 +3591,14 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 
 .caixa { max-width: 614px; border-left: 4px solid var(--tijolo); padding-left: 22px; }
 
-.identificacao { font-size: 12.5px; font-weight: 600; color: #f3b9ba; margin: 0 0 12px; }
+.identificacao { font-size: 12.5px; font-weight: 600; color: var(--tijolo-claro); margin: 0 0 12px; }
 
 .titulo {
   font-size: 38px;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.033em;
-  color: #fff;
+  color: var(--papel);
   margin: 0 0 13px;
 }
 
@@ -3433,7 +3615,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 .acao {
   display: inline-block;
   background: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
   padding: 12px 20px;
   border-radius: var(--raio-controle);
   font-size: 14.5px;
@@ -3443,9 +3625,9 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 
 .acao:hover { background: var(--tijolo-escuro); }
 
-.claro { background: #fff; color: var(--ardosia-escura); }
+.claro { background: var(--papel); color: var(--ardosia-escura); }
 
-.claro:hover { background: #dfe5e8; }
+.claro:hover { background: var(--regra); }
 ```
 
 - [ ] **Step 6: Escrever a home**
@@ -3473,13 +3655,7 @@ export default async function Home() {
     contarVigentes(db, agora),
   ])
 
-  const destaque = escolherDestaque(itens)
-  const restantes = itens.filter((i) => i.id !== destaque?.id)
-
-  const avisos = restantes.filter((i) => i.tipo === 'aviso').slice(0, 4)
-  const eventos = restantes.filter((i) => i.tipo === 'evento').slice(0, 2)
-  const prazos = restantes.filter((i) => i.tipo === 'prazo').slice(0, 4)
-  const noticias = restantes.filter((i) => i.tipo === 'noticia')
+  const { destaque, avisos, eventos, prazos, noticias } = montarSecoesDaHome(itens)
 
   return (
     <>
@@ -3586,10 +3762,26 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 Quatro rotas de listagem que compartilham um componente, e a página individual — que continua acessível mesmo depois de a publicação sair do mural.
 
 **Files:**
-- Create: `src/components/mural/ListagemPorTipo.tsx`
+- Create: `src/components/mural/ListagemPorTipo.tsx` (busca) e `ListaDeSecao.tsx` (desenha)
 - Create: `src/app/avisos/page.tsx`, `src/app/eventos/page.tsx`, `src/app/prazos/page.tsx`, `src/app/comunidade/page.tsx`
-- Create: `src/app/p/[slug]/page.tsx` + `pagina.module.css`
-- Test: `tests/integracao/rotas.test.ts`
+- Create: `src/app/p/[slug]/page.tsx` (busca) + `pagina.module.css`
+- Create: `src/components/mural/ArtigoPublicacao.tsx` (desenha)
+- Test: `tests/integracao/rotas.test.ts`, `tests/unidade/listagem-e-artigo.test.tsx`
+
+**Separação que torna a interface testável.** Um Server Component assíncrono que
+busca no banco não pode ser renderizado num teste de unidade. Por isso cada
+página se divide em duas peças: a assíncrona busca os dados e delega, e a pura
+recebe tudo por props e desenha. É a mesma lição de `montarSecoesDaHome`: o que
+não é testável isoladamente é o que passa despercebido.
+
+- `ListagemPorTipo` busca e chama `<ListaDeSecao itens tipo agora />`.
+- A página `/p/[slug]` busca, trata `notFound()` e chama
+  `<ArtigoPublicacao publicacao agora />`.
+
+Os testes de renderização usam `criarPublicacao` da Tarefa 10 e cobrem, no
+mínimo: o aviso "saiu do mural" aparecendo quando vencida e ausente quando
+vigente; a ordem renderizada em cada tipo de listagem; e a listagem vazia
+mostrando a frase em vez de nada.
 
 **Interfaces:**
 - Consumes: `listarPorTipo`, `buscarPorSlug` de `@/lib/publicacoes/consultas`; componentes da Task 10
@@ -3601,6 +3793,7 @@ Quatro rotas de listagem que compartilham um componente, e a página individual 
 // src/components/mural/ListagemPorTipo.tsx
 import { db } from '@/lib/db/client'
 import { listarPorTipo } from '@/lib/publicacoes/consultas'
+import { ordenarSecao } from '@/lib/publicacoes/secoes'
 import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import { CAMINHO_TIPO } from '@/lib/publicacoes/tipos'
 import { Navegacao } from '@/components/layout/Navegacao'
@@ -3620,7 +3813,10 @@ export async function ListagemPorTipo({
   descricao: string
 }) {
   const agora = new Date()
-  const itens = await listarPorTipo(db, tipo, agora)
+  // A mesma ordem das seções da home: prazo pela data-limite, evento pela
+  // data em que acontece. A página de prazos promete "do que vence antes ao
+  // que vence depois" no próprio texto, e precisa cumprir.
+  const itens = ordenarSecao(await listarPorTipo(db, tipo, agora), tipo)
 
   return (
     <>
@@ -3740,7 +3936,7 @@ import {
   formatarHorario,
   paraAtributoDatetime,
 } from '@/lib/formato/datas'
-import { ROTULO_TIPO } from '@/lib/publicacoes/tipos'
+import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import css from './pagina.module.css'
 
 export const revalidate = 300
@@ -4246,7 +4442,19 @@ A busca full-text em português, os filtros combinados, e as contagens que alime
 - Test: `tests/integracao/busca.test.ts`
 
 **Interfaces:**
-- Consumes: `Filtros` de `@/lib/busca/filtros`; `Db`; `PublicacaoDoMural`
+- Consumes: `Filtros` e `semFiltro` de `@/lib/busca/filtros`; `type Db`; `PublicacaoDoMural`;
+  `semAcento` de `@/lib/publicacoes/slug`; e **três peças compartilhadas que esta tarefa
+  NÃO redefine**: `achatar` e `COM_RELACOES` de `@/lib/publicacoes/achatar`, `paraOrdenacao`
+  e `ordenarMural` de `@/lib/publicacoes/ordenacao`, e `vigente` de
+  `@/lib/publicacoes/consultas`
+
+**Nada aqui é copiado da Tarefa 8.** Este brief foi escrito antes de a Tarefa 8 centralizar
+`achatar`, e o código de exemplo abaixo ainda mostra definições locais de `COM_RELACOES`, de
+`paraOrdenacao` e da condição de vigência. **Todas as três são para importar, não recriar.**
+
+A condição de vigência é a mais importante das três: se o mural e a busca tiverem cópias
+separadas de "está no mural agora", alguém muda uma e as duas telas passam a discordar sobre
+o que está publicado — sem erro, sem aviso, só um aviso que aparece numa e não na outra.
 - Produces:
   - `buscar(db: Db, f: Filtros, agora: Date): Promise<{ itens: PublicacaoDoMural[]; total: number }>`
   - `sugerirSaidas(db: Db, f: Filtros, agora: Date): Promise<{ semPeriodo: number; semTipo: number; semCurso: number }>`
@@ -4287,9 +4495,14 @@ describe('busca textual', () => {
     expect(itens.some((i) => i.titulo.includes('calendário'))).toBe(true)
   })
 
-  it('reduz ao radical: "inscrições" acha "inscrição"', async () => {
-    const { itens } = await buscar(ctx.db, filtros({ q: 'inscrições' }), agora)
+  it('reduz ao radical: "disciplinas" acha "disciplina"', async () => {
+    const { itens } = await buscar(ctx.db, filtros({ q: 'disciplinas' }), agora)
     expect(itens.length).toBeGreaterThan(0)
+  })
+
+  it('acha também o termo digitado COM acento, porque os dois lados dobram', async () => {
+    const { itens } = await buscar(ctx.db, filtros({ q: 'calendário' }), agora)
+    expect(itens.some((i) => i.titulo.includes('calendário'))).toBe(true)
   })
 
   it('não traz publicação vencida', async () => {
@@ -4369,6 +4582,7 @@ import { cursos, publicacoes, publicacoesCursos } from '@/lib/db/schema'
 import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
 import { ordenarMural } from '@/lib/publicacoes/ordenacao'
 import { semFiltro, type Filtros } from '@/lib/busca/filtros'
+import { semAcento } from '@/lib/publicacoes/slug'
 
 const COM_RELACOES = {
   setor: { columns: { nome: true, slug: true } },
@@ -4404,7 +4618,7 @@ async function condicao(db: Db, f: Filtros, agora: Date): Promise<SQL | undefine
 
   if (f.q) {
     partes.push(
-      sql`${publicacoes.buscaTsv} @@ websearch_to_tsquery('portuguese', ${f.q})`,
+      sql`${publicacoes.buscaTsv} @@ websearch_to_tsquery('portuguese', ${semAcento(f.q)})`,
     )
   }
 
@@ -4475,7 +4689,11 @@ export async function sugerirSaidas(
   agora: Date,
 ): Promise<{ semPeriodo: number; semTipo: number; semCurso: number }> {
   const [semPeriodo, semTipo, semCurso] = await Promise.all([
-    buscar(db, semFiltro(f, 'periodo'), agora),
+    // 'qualquer', e não semFiltro: o link da tela vazia leva para "qualquer
+    // data", enquanto semFiltro devolve o período ao padrão de 30 dias. Com o
+    // padrão já ativo, semFiltro vira no-op, a contagem repete o zero da busca
+    // atual, e a saída some da tela mesmo havendo resultado mais adiante.
+    buscar(db, { ...f, periodo: 'qualquer' }, agora),
     buscar(db, semFiltro(f, 'tipo'), agora),
     buscar(db, semFiltro(f, 'curso'), agora),
   ])
@@ -4732,7 +4950,7 @@ export function BarraFiltros({
   border: 0;
   border-radius: var(--raio-controle);
   background: var(--ardosia);
-  color: #fff;
+  color: var(--papel);
   cursor: pointer;
   transition: background 0.18s ease;
 }
@@ -4791,7 +5009,7 @@ export function FichasAtivas({
   border-radius: 6px;
 }
 
-.ficha:hover { background: var(--ardosia); color: #fff; }
+.ficha:hover { background: var(--ardosia); color: var(--papel); }
 
 .x { font-size: 11px; }
 
@@ -4811,6 +5029,21 @@ function href(f: Filtros): string {
   return qs ? `/buscar?${qs}` : '/buscar'
 }
 
+/**
+ * Como cada tipo aparece numa frase corrida, com o artigo certo. Não dá para
+ * derivar de ROTULO_TIPO: ele é rótulo de seção ("Comunidade"), e "Nenhuma
+ * comunidade de ADS" não é português. O gênero também não é adivinhável —
+ * sem isto a tela mais comum de resultado zero dizia "Nenhum publicação".
+ */
+const NA_FRASE: Record<TipoPublicacao, { artigo: string; nome: string }> = {
+  aviso: { artigo: 'Nenhum', nome: 'aviso' },
+  evento: { artigo: 'Nenhum', nome: 'evento' },
+  prazo: { artigo: 'Nenhum', nome: 'prazo' },
+  noticia: { artigo: 'Nenhuma', nome: 'notícia' },
+}
+
+const SEM_TIPO = { artigo: 'Nenhuma', nome: 'publicação' }
+
 export function EstadoVazio({
   filtros,
   nomesDeCurso,
@@ -4820,12 +5053,12 @@ export function EstadoVazio({
   nomesDeCurso: Record<string, string>
   saidas: { semPeriodo: number; semTipo: number; semCurso: number }
 }) {
-  const nomeTipo = filtros.tipo ? ROTULO_TIPO[filtros.tipo].toLowerCase() : 'publicação'
+  const { artigo, nome: nomeTipo } = filtros.tipo ? NA_FRASE[filtros.tipo] : SEM_TIPO
   const nomeCurso = filtros.curso ? nomesDeCurso[filtros.curso] ?? filtros.curso : null
   const periodo = ROTULO_PERIODO[filtros.periodo].toLowerCase()
 
   const titulo = [
-    `Nenhum ${nomeTipo}`,
+    `${artigo} ${nomeTipo}`,
     nomeCurso ? `de ${nomeCurso}` : null,
     filtros.q ? `para “${filtros.q}”` : null,
     filtros.periodo !== 'qualquer' ? `${periodo}` : null,
@@ -4983,6 +5216,35 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 ```
 
 ---
+
+### Task 15b: Banco em memória para desenvolvimento
+
+Sem isto, `npm run dev` não sobe e a Tarefa 16 não tem contra o que rodar. Também
+é o que faz alguém clonar o repositório e ver o mural funcionando sem instalar
+nada — que para uma entrega acadêmica vale por si.
+
+**Files:**
+- Create: `src/lib/db/migrar.ts`
+- Modify: `src/lib/db/client.ts`, `src/lib/db/seed.ts`
+- Modify: `tests/integracao/ajuda/banco.ts` (passa a usar o módulo compartilhado)
+- Modify: os quatro consumidores de `db` — `src/app/page.tsx`,
+  `src/app/buscar/page.tsx`, `src/app/p/[slug]/page.tsx`,
+  `src/components/mural/ListagemPorTipo.tsx`
+
+**Como funciona.** `client.ts` deixa de exportar um `db` pronto e passa a exportar
+`obterDb(): Promise<Db>`, memoizada. Com `DATABASE_URL` real, ela devolve a
+conexão postgres-js de sempre. Sem ela — ou com o placeholder do `.env.example` —
+ela sobe um PGlite em memória, aplica as migrações, semeia, e **avisa em voz alta
+no console** que aquilo é banco de desenvolvimento e os dados somem ao reiniciar.
+
+Isso só é possível porque `Db` já é independente de driver desde a Tarefa 7.
+
+**A rotina que aplica migrações sai do arquivo de teste** e vira
+`src/lib/db/migrar.ts`, usada pelos dois. Quatro vezes neste plano uma definição
+acabou duplicada entre tarefas; esta é a quinta candidata e não vai ser.
+
+**O que NÃO fazer:** nada de fallback silencioso. Se o aviso não aparecer, alguém
+vai achar que está olhando dados de produção.
 
 ### Task 16: Testes de ponta a ponta
 

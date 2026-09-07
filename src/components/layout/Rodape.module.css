@@ -1,0 +1,25 @@
+.pe {
+  background: var(--ardosia-escura);
+  color: rgba(255, 255, 255, 0.72);
+  margin-top: 46px;
+  padding-top: 38px;
+  padding-bottom: 28px;
+}
+
+.colunas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+
+.titulo { font-size: 14px; font-weight: 600; color: var(--papel); margin: 0 0 13px; }
+
+.pe ul { list-style: none; margin: 0; padding: 0; }
+
+.pe li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.45; }
+
+.pe a:hover { color: var(--papel); text-decoration: underline; }
+
+.fim {
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  margin-top: 30px;
+  padding-top: 19px;
+  font-size: 14px;
+  line-height: 1.6;
+}

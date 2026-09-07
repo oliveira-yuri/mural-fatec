@@ -1,0 +1,37 @@
+.card { display: block; }
+
+.foto {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: var(--raio-imagem);
+}
+
+.dia { font-size: 13px; font-weight: 600; color: var(--tijolo); margin: 15px 0 8px; }
+
+.titulo {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.26;
+  letter-spacing: -0.025em;
+  color: var(--ardosia);
+  margin: 0 0 9px;
+  transition: color 0.15s ease;
+}
+
+.card:hover .titulo { color: var(--tijolo); }
+
+.resumo { font-size: 15.5px; line-height: 1.5; color: var(--cinza); margin: 0 0 13px; max-width: 48ch; }
+
+.fatos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 14px;
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.fatos dt { color: var(--cinza); }
+
+.fatos dd { margin: 0; }

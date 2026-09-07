@@ -1,0 +1,15 @@
+.barra { background: var(--ardosia-escura); color: rgba(255, 255, 255, 0.78); }
+
+.faixa {
+  display: flex;
+  gap: 19px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 9px;
+  padding-bottom: 9px;
+  font-size: 12.5px;
+}
+
+.faixa a:hover { color: var(--papel); text-decoration: underline; }
+
+.fim { margin-left: auto; }

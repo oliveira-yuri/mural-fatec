@@ -1,0 +1,21 @@
+.cabeca {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  border-top: 2px solid var(--ardosia);
+  padding-top: 12px;
+  margin-bottom: 20px;
+}
+
+.titulo {
+  font-size: 23px;
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  color: var(--ardosia);
+  margin: 0;
+}
+
+.cabeca a { font-size: 14px; font-weight: 500; color: var(--tijolo); }
+
+.cabeca a:hover { text-decoration: underline; }
