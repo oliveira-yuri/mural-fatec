@@ -3333,7 +3333,7 @@ O hero com o aviso mais importante do momento, seguido das quatro seções. É a
 ```ts
 // tests/unidade/destaque.test.ts
 import { describe, it, expect } from 'vitest'
-import { escolherDestaque } from '@/lib/publicacoes/destaque'
+import { montarSecoesDaHome } from '@/lib/publicacoes/secoes'
 import { criarPublicacao } from './ajuda/publicacao'
 
 describe('escolherDestaque', () => {
@@ -3387,6 +3387,76 @@ export function escolherDestaque(itens: PublicacaoDoMural[]): PublicacaoDoMural 
   if (urgente) return urgente
 
   return itens[0]
+}
+```
+
+- [ ] **Step 2b: Ordem dentro de uma seção, e a composição da home**
+
+A ordem do mural mistura tipos e vence a relevância temporal. Dentro de uma
+seção de um tipo só, a ordem natural é outra: a data que aquele tipo carrega.
+Um prazo que fecha antes vem antes; um evento que acontece antes vem antes.
+
+Sem isso, o critério da spec §1 não se cumpre. `ordenarMural` só prioriza um
+prazo quando faltam 7 dias ou menos; além disso ele cai na ordem por data de
+publicação. Com seis prazos e nenhum urgente, o que fecha em dez dias pode
+ficar em quinto lugar e ser cortado pelo `slice(0, 4)` — e o aluno não acha o
+prazo mais próximo na home, que é exatamente o que a spec promete.
+
+A composição da home também sai da página. Enquanto ela viver dentro de um
+Server Component que depende de banco, não há teste que a exercite, e foi por
+isso que esse buraco atravessou o plano inteiro sem ser notado.
+
+```ts
+// src/lib/publicacoes/secoes.ts
+import { escolherDestaque } from '@/lib/publicacoes/destaque'
+import type { PublicacaoDoMural, TipoPublicacao } from '@/lib/publicacoes/tipos'
+
+const DISTANTE = Number.MAX_SAFE_INTEGER
+
+/** Chave de ordem de cada tipo, sempre crescente. */
+const CHAVE: Record<TipoPublicacao, (p: PublicacaoDoMural) => number> = {
+  prazo: (p) => p.prazoFinal?.getTime() ?? DISTANTE,
+  evento: (p) => p.inicioEm?.getTime() ?? DISTANTE,
+  aviso: (p) => -(p.publicadoEm?.getTime() ?? 0),
+  noticia: (p) => -(p.publicadoEm?.getTime() ?? 0),
+}
+
+/**
+ * Ordem dentro de uma seção de um tipo só — diferente da ordem do mural.
+ * Prazo pela data-limite, evento pela data em que acontece, aviso e notícia
+ * do mais recente ao mais antigo. Item sem a data do seu tipo vai para o fim,
+ * em vez de embaralhar os que têm.
+ */
+export function ordenarSecao(
+  itens: readonly PublicacaoDoMural[],
+  tipo: TipoPublicacao,
+): PublicacaoDoMural[] {
+  const chave = CHAVE[tipo]
+  return [...itens].sort((a, b) => chave(a) - chave(b))
+}
+
+export type SecoesDaHome = {
+  destaque: PublicacaoDoMural | null
+  avisos: PublicacaoDoMural[]
+  eventos: PublicacaoDoMural[]
+  prazos: PublicacaoDoMural[]
+  noticias: PublicacaoDoMural[]
+}
+
+/** O que a home mostra, a partir da lista já vigente e ordenada. */
+export function montarSecoesDaHome(itens: PublicacaoDoMural[]): SecoesDaHome {
+  const destaque = escolherDestaque(itens)
+  const restantes = itens.filter((i) => i.id !== destaque?.id)
+  const doTipo = (t: TipoPublicacao) =>
+    ordenarSecao(restantes.filter((i) => i.tipo === t), t)
+
+  return {
+    destaque,
+    avisos: doTipo('aviso').slice(0, 4),
+    eventos: doTipo('evento').slice(0, 2),
+    prazos: doTipo('prazo').slice(0, 4),
+    noticias: doTipo('noticia'),
+  }
 }
 ```
 
@@ -3585,13 +3655,7 @@ export default async function Home() {
     contarVigentes(db, agora),
   ])
 
-  const destaque = escolherDestaque(itens)
-  const restantes = itens.filter((i) => i.id !== destaque?.id)
-
-  const avisos = restantes.filter((i) => i.tipo === 'aviso').slice(0, 4)
-  const eventos = restantes.filter((i) => i.tipo === 'evento').slice(0, 2)
-  const prazos = restantes.filter((i) => i.tipo === 'prazo').slice(0, 4)
-  const noticias = restantes.filter((i) => i.tipo === 'noticia')
+  const { destaque, avisos, eventos, prazos, noticias } = montarSecoesDaHome(itens)
 
   return (
     <>
@@ -3713,6 +3777,7 @@ Quatro rotas de listagem que compartilham um componente, e a página individual 
 // src/components/mural/ListagemPorTipo.tsx
 import { db } from '@/lib/db/client'
 import { listarPorTipo } from '@/lib/publicacoes/consultas'
+import { ordenarSecao } from '@/lib/publicacoes/secoes'
 import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import { CAMINHO_TIPO } from '@/lib/publicacoes/tipos'
 import { Navegacao } from '@/components/layout/Navegacao'
@@ -3732,7 +3797,10 @@ export async function ListagemPorTipo({
   descricao: string
 }) {
   const agora = new Date()
-  const itens = await listarPorTipo(db, tipo, agora)
+  // A mesma ordem das seções da home: prazo pela data-limite, evento pela
+  // data em que acontece. A página de prazos promete "do que vence antes ao
+  // que vence depois" no próprio texto, e precisa cumprir.
+  const itens = ordenarSecao(await listarPorTipo(db, tipo, agora), tipo)
 
   return (
     <>
