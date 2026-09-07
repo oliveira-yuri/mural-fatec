@@ -3936,7 +3936,7 @@ import {
   formatarHorario,
   paraAtributoDatetime,
 } from '@/lib/formato/datas'
-import { ROTULO_TIPO } from '@/lib/publicacoes/tipos'
+import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import css from './pagina.module.css'
 
 export const revalidate = 300
@@ -4689,7 +4689,11 @@ export async function sugerirSaidas(
   agora: Date,
 ): Promise<{ semPeriodo: number; semTipo: number; semCurso: number }> {
   const [semPeriodo, semTipo, semCurso] = await Promise.all([
-    buscar(db, semFiltro(f, 'periodo'), agora),
+    // 'qualquer', e não semFiltro: o link da tela vazia leva para "qualquer
+    // data", enquanto semFiltro devolve o período ao padrão de 30 dias. Com o
+    // padrão já ativo, semFiltro vira no-op, a contagem repete o zero da busca
+    // atual, e a saída some da tela mesmo havendo resultado mais adiante.
+    buscar(db, { ...f, periodo: 'qualquer' }, agora),
     buscar(db, semFiltro(f, 'tipo'), agora),
     buscar(db, semFiltro(f, 'curso'), agora),
   ])
@@ -5025,6 +5029,21 @@ function href(f: Filtros): string {
   return qs ? `/buscar?${qs}` : '/buscar'
 }
 
+/**
+ * Como cada tipo aparece numa frase corrida, com o artigo certo. Não dá para
+ * derivar de ROTULO_TIPO: ele é rótulo de seção ("Comunidade"), e "Nenhuma
+ * comunidade de ADS" não é português. O gênero também não é adivinhável —
+ * sem isto a tela mais comum de resultado zero dizia "Nenhum publicação".
+ */
+const NA_FRASE: Record<TipoPublicacao, { artigo: string; nome: string }> = {
+  aviso: { artigo: 'Nenhum', nome: 'aviso' },
+  evento: { artigo: 'Nenhum', nome: 'evento' },
+  prazo: { artigo: 'Nenhum', nome: 'prazo' },
+  noticia: { artigo: 'Nenhuma', nome: 'notícia' },
+}
+
+const SEM_TIPO = { artigo: 'Nenhuma', nome: 'publicação' }
+
 export function EstadoVazio({
   filtros,
   nomesDeCurso,
@@ -5034,12 +5053,12 @@ export function EstadoVazio({
   nomesDeCurso: Record<string, string>
   saidas: { semPeriodo: number; semTipo: number; semCurso: number }
 }) {
-  const nomeTipo = filtros.tipo ? ROTULO_TIPO[filtros.tipo].toLowerCase() : 'publicação'
+  const { artigo, nome: nomeTipo } = filtros.tipo ? NA_FRASE[filtros.tipo] : SEM_TIPO
   const nomeCurso = filtros.curso ? nomesDeCurso[filtros.curso] ?? filtros.curso : null
   const periodo = ROTULO_PERIODO[filtros.periodo].toLowerCase()
 
   const titulo = [
-    `Nenhum ${nomeTipo}`,
+    `${artigo} ${nomeTipo}`,
     nomeCurso ? `de ${nomeCurso}` : null,
     filtros.q ? `para “${filtros.q}”` : null,
     filtros.periodo !== 'qualquer' ? `${periodo}` : null,
