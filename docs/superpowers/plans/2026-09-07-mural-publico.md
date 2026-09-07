@@ -128,7 +128,7 @@ mural-fatec/
 Cria o projeto, os tokens de design, as fontes e o arranjo de testes. Ao final, `npm run dev` mostra uma página usando a paleta e a tipografia corretas, e `npm test` roda.
 
 **Files:**
-- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`, `.env.example`
+- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `vitest.config.ts`
 - Create: `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`
 - Test: `tests/unidade/fundacao.test.ts`
 
