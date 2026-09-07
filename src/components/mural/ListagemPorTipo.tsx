@@ -4,10 +4,7 @@ import { ordenarSecao } from '@/lib/publicacoes/secoes'
 import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import { CAMINHO_TIPO } from '@/lib/publicacoes/tipos'
 import { Navegacao } from '@/components/layout/Navegacao'
-import { LinhaAviso } from './LinhaAviso'
-import { CardEvento } from './CardEvento'
-import { LinhaPrazo } from './LinhaPrazo'
-import { NotaComunidade } from './NotaComunidade'
+import { ListaDeSecao } from './ListaDeSecao'
 import css from '@/app/pagina.module.css'
 
 export async function ListagemPorTipo({
@@ -29,24 +26,7 @@ export async function ListagemPorTipo({
     <>
       <Navegacao ativo={CAMINHO_TIPO[tipo]} />
       <main id="conteudo" className={`pagina ${css.secao}`}>
-        <h1>{titulo}</h1>
-        <p className="narrow">{descricao}</p>
-
-        {itens.length === 0 ? (
-          <p className="narrow">Nada publicado nesta seção no momento.</p>
-        ) : tipo === 'evento' ? (
-          <div className={css.doisPorLinha}>
-            {itens.map((i) => <CardEvento key={i.id} publicacao={i} />)}
-          </div>
-        ) : (
-          <div className={css.lista}>
-            {itens.map((i) =>
-              tipo === 'aviso' ? <LinhaAviso key={i.id} publicacao={i} />
-              : tipo === 'prazo' ? <LinhaPrazo key={i.id} publicacao={i} agora={agora} />
-              : <NotaComunidade key={i.id} publicacao={i} variante="compacta" />,
-            )}
-          </div>
-        )}
+        <ListaDeSecao itens={itens} tipo={tipo} titulo={titulo} descricao={descricao} agora={agora} />
       </main>
     </>
   )
