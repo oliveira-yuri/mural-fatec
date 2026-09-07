@@ -1,6 +1,6 @@
 import { db } from '@/lib/db/client'
 import { listarMural, contarVigentes } from '@/lib/publicacoes/consultas'
-import { escolherDestaque } from '@/lib/publicacoes/destaque'
+import { montarSecoesDaHome } from '@/lib/publicacoes/secoes'
 import { Navegacao } from '@/components/layout/Navegacao'
 import { Hero } from '@/components/mural/Hero'
 import { TituloSecao } from '@/components/mural/TituloSecao'
@@ -19,13 +19,7 @@ export default async function Home() {
     contarVigentes(db, agora),
   ])
 
-  const destaque = escolherDestaque(itens)
-  const restantes = itens.filter((i) => i.id !== destaque?.id)
-
-  const avisos = restantes.filter((i) => i.tipo === 'aviso').slice(0, 4)
-  const eventos = restantes.filter((i) => i.tipo === 'evento').slice(0, 2)
-  const prazos = restantes.filter((i) => i.tipo === 'prazo').slice(0, 4)
-  const noticias = restantes.filter((i) => i.tipo === 'noticia')
+  const { destaque, avisos, eventos, prazos, noticias } = montarSecoesDaHome(itens)
 
   return (
     <>
