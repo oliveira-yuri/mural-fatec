@@ -20,9 +20,18 @@
   min-height: 400px;
 }
 
+/* Um elemento position:absolute pinta DEPOIS de um elemento estático no
+   mesmo contexto de empilhamento, mesmo vindo antes no DOM — e opacity < 1
+   cria contexto de empilhamento próprio, então a ordem do DOM não bastava
+   para prever isto. Sem z-index explícito, a foto (agora absolute) pintava
+   por cima do véu (estático), escondendo título, resumo e botões e
+   bloqueando o clique em "Ler o comunicado". z-index restaura a ordem
+   visual original sem tirar o véu do fluxo (que é o que faz o hero
+   calcular a altura por ele). */
 .fundo {
   position: absolute;
   inset: 0;
+  z-index: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -32,6 +41,8 @@
 .veu {
   grid-area: 1 / 1;
   align-self: end;
+  position: relative;
+  z-index: 1;
   background: linear-gradient(to top, rgba(51, 69, 78, 0.94) 12%, rgba(51, 69, 78, 0));
   padding-top: 66px;
   padding-bottom: 34px;

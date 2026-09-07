@@ -28,6 +28,36 @@ test('a home abre com o aviso mais importante no topo', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Ler o comunicado' })).toBeVisible()
 })
 
+test('o hero com foto não esconde o texto nem bloqueia o clique', async ({ page }) => {
+  await page.goto('/')
+  // Este teste existe porque duas rodadas seguidas de bug no Hero passaram
+  // batido: nenhuma publicação do seed tinha imagem, então o caminho "com
+  // foto" nunca era exercitado. Agora a publicação em destaque tem
+  // imagemUrl, e este teste cobre exatamente o que os dois bugs quebraram:
+  // a foto aparecer, o texto continuar visível por cima dela, e o clique
+  // no CTA não ser interceptado pela imagem.
+  const hero = page.locator('section[class*=hero]')
+  await expect(hero.locator('img[class*=fundo]')).toBeVisible()
+
+  const titulo = hero.getByRole('heading', { level: 1 })
+  await estaRealmenteVisivel(titulo)
+
+  // toBeVisible() e opacity não bastam para provar empilhamento: um
+  // elemento pode estar "visível" e ainda assim ter outro elemento opaco
+  // pintado por cima dele (foi exatamente o bug que a rodada anterior
+  // introduziu). elementFromPoint no centro do título tem que devolver o
+  // próprio título, não a <img> do fundo.
+  const centroEhOTitulo = await titulo.evaluate((el) => {
+    const r = el.getBoundingClientRect()
+    const alvo = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2)
+    return alvo != null && (alvo === el || el.contains(alvo))
+  })
+  expect(centroEhOTitulo).toBe(true)
+
+  await page.getByRole('link', { name: 'Ler o comunicado' }).click()
+  await expect(page).toHaveURL(/\/p\/alteracao-no-calendario-academico-do-2-semestre/)
+})
+
 test('o aluno chega ao prazo mais próximo sem buscar nem filtrar', async ({ page }) => {
   await page.goto('/')
   const prazos = page.getByRole('heading', { name: 'Prazos abertos' })

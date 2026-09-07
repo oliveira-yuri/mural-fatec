@@ -69,6 +69,13 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         urgencia: 'urgente',
         documentoNumero: '042/2026',
         destaque: true,
+        // Imagem local (public/exemplo/), não uma URL externa: o seed
+        // precisa continuar hermético, sem depender de rede. Existe porque
+        // duas rodadas seguidas de bug no Hero passaram batido nos testes
+        // de ponta a ponta por nenhuma publicação do seed ter imagem — o
+        // caminho "com foto" nunca era exercitado de verdade.
+        imagemUrl: '/exemplo/imagem-exemplo.svg',
+        imagemAlt: 'Ilustração de exemplo em tom de ardósia, usada como imagem de capa deste aviso.',
         publicadoEm: subDays(agora, 3),
         expiraEm: addDays(agora, 27),
       },
@@ -98,6 +105,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         local: 'Auditório do Bloco B',
         modalidade: 'presencial',
         vagasRestantes: 23,
+        imagemUrl: '/exemplo/imagem-exemplo.svg',
+        imagemAlt: 'Ilustração de exemplo em tom de ardósia, usada como imagem de capa deste evento.',
         publicadoEm: subDays(agora, 6),
         expiraEm: addDays(agora, 22),
       },
