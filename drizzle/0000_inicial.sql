@@ -48,9 +48,15 @@ CREATE TABLE "publicacoes" (
 --> statement-breakpoint
 ALTER TABLE "publicacoes" ADD COLUMN "busca_tsv" tsvector
   GENERATED ALWAYS AS (
-    setweight(to_tsvector('portuguese', coalesce("titulo", '')), 'A') ||
-    setweight(to_tsvector('portuguese', coalesce("resumo", '')), 'B') ||
-    setweight(to_tsvector('portuguese', coalesce("corpo", '')), 'C')
+    setweight(to_tsvector('portuguese', translate(coalesce("titulo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'A') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("resumo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'B') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("corpo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'C')
   ) STORED;
 --> statement-breakpoint
 CREATE TABLE "publicacoes_cursos" (

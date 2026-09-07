@@ -51,11 +51,16 @@ describe('schema', () => {
       "select busca_tsv::text as v from publicacoes limit 1",
     )
     const vetor = resultado.rows[0].v
-    // "acadêmico" entra reduzido ao radical pelo stemmer 'portuguese' do Postgres
-    // (o acento é preservado: a config 'portuguese' não remove acentos, isso
-    // exigiria a extensão 'unaccent', que não está em uso aqui), marcado com peso A
-    expect(vetor).toMatch(/acadêm/)
+    // "acadêmico" entra sem acento e reduzido ao radical, marcado com peso A
+    expect(vetor).toMatch(/academ/)
     expect(vetor).toMatch(/A/)
+  })
+
+  it('acha o conteúdo mesmo com o termo digitado sem acento', async () => {
+    const r = await ctx.cliente.query<{ casou: boolean }>(
+      "select busca_tsv @@ websearch_to_tsquery('portuguese','calendario') as casou from publicacoes limit 1",
+    )
+    expect(r.rows[0].casou).toBe(true)
   })
 
   it('recusa slug duplicado', async () => {
