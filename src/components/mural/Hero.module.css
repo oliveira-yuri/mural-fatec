@@ -1,4 +1,7 @@
-.hero { position: relative; background: var(--ardosia-escura); }
+/* min-height porque a altura do hero vinha só da <img> de fundo, que é
+   opcional. Sem ela o elemento colapsava para zero e o véu, ancorado no
+   rodapé, subia por cima do cabeçalho e bloqueava o clique na busca. */
+.hero { position: relative; background: var(--ardosia-escura); min-height: 400px; }
 
 .fundo { width: 100%; height: 400px; object-fit: cover; opacity: 0.44; }
 
