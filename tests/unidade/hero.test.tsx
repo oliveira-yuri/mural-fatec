@@ -42,6 +42,40 @@ describe('Hero', () => {
     expect(screen.queryByRole('link', { name: /Baixar/ })).not.toBeInTheDocument()
   })
 
+  it('num evento em destaque, a cópia fala de evento, não de comunicado', () => {
+    const evento = criarPublicacao({
+      tipo: 'evento',
+      titulo: 'Semana de Tecnologia',
+      documentoNumero: null,
+      anexos: [{ url: 'https://exemplo.org/programacao.pdf', nome: 'Programação completa', bytes: 102400, mime: 'application/pdf' }],
+    })
+    render(<Hero publicacao={evento} />)
+    expect(screen.getByRole('link', { name: 'Ver o evento' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Ler o comunicado' })).not.toBeInTheDocument()
+    // O anexo de um evento não é edital: quem nomeia é o próprio anexo.
+    expect(screen.getByRole('link', { name: /Baixar Programação completa/ })).toBeInTheDocument()
+    expect(screen.queryByText(/Baixar edital/)).not.toBeInTheDocument()
+    expect(screen.getByText(/^Evento —/)).toBeInTheDocument()
+  })
+
+  it('numa notícia em destaque, a cópia fala de notícia', () => {
+    const noticia = criarPublicacao({
+      tipo: 'noticia',
+      titulo: 'Equipe de ADS fica em terceiro na Maratona',
+      documentoNumero: null,
+      anexos: null,
+    })
+    render(<Hero publicacao={noticia} />)
+    expect(screen.getByRole('link', { name: 'Ler a notícia' })).toBeInTheDocument()
+    expect(screen.getByText(/^Comunidade —/)).toBeInTheDocument()
+  })
+
+  it('num prazo em destaque, a cópia fala de prazo', () => {
+    const prazo = criarPublicacao({ tipo: 'prazo', titulo: 'Inscrição em disciplinas', documentoNumero: null, anexos: null })
+    render(<Hero publicacao={prazo} />)
+    expect(screen.getByRole('link', { name: 'Ver o prazo' })).toBeInTheDocument()
+  })
+
   it('marca a foto de fundo como decorativa, já que o texto está por cima', () => {
     const { container } = render(<Hero publicacao={aviso} />)
     expect(container.querySelector('img')).toHaveAttribute('alt', 'Estudantes no pátio central da Fatec Campinas')

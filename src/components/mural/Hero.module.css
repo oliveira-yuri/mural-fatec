@@ -43,7 +43,19 @@
   align-self: end;
   position: relative;
   z-index: 1;
-  background: linear-gradient(to top, rgba(51, 69, 78, 0.94) 12%, rgba(51, 69, 78, 0));
+  /* Piso sólido + gradiente, e não só o gradiente. O gradiente sozinho
+     chegava a alpha 0 no topo do véu, então o contraste do texto dependia da
+     foto: com a imagem escura do seed o título branco passava folgado, mas
+     com uma foto clara (pátio ao sol, parede branca — spec §16.4 diz que
+     fotos reais vão entrar) o fundo efetivo sob o título subia para ~#8D979C
+     e o branco caía para 2,9:1, reprovado no AA que a §12 exige. O piso de
+     0.80 garante o pior caso possível (foto branca chapada, com a .fundo em
+     opacity 0.44): título branco 7,7:1, resumo 6,4:1, linha de identificação
+     em --tijolo-claro 4,6:1 — os três acima de 4,5:1 independentemente da
+     foto. Somado ao gradiente, o pé do véu chega a 0,97 de opacidade. */
+  background:
+    linear-gradient(to top, rgba(51, 69, 78, 0.85) 12%, rgba(51, 69, 78, 0)),
+    rgba(51, 69, 78, 0.8);
   padding-top: 66px;
   padding-bottom: 34px;
 }

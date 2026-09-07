@@ -1,8 +1,5 @@
 import type { PublicacaoDoMural, TipoPublicacao } from '@/lib/publicacoes/tipos'
-import { LinhaAviso } from './LinhaAviso'
-import { CardEvento } from './CardEvento'
-import { LinhaPrazo } from './LinhaPrazo'
-import { NotaComunidade } from './NotaComunidade'
+import { ItemDoMural } from './ItemDoMural'
 import css from '@/app/pagina.module.css'
 
 /**
@@ -25,6 +22,12 @@ export function ListaDeSecao({
   descricao: string
   agora: Date
 }) {
+  // Aqui o `<h1>` é o título da página e não há seção intermediária, então
+  // os itens entram em `<h2>`: sem isto a página pulava de h1 para h3.
+  const itensDaLista = itens.map((i) => (
+    <ItemDoMural key={i.id} publicacao={i} agora={agora} nivel={2} />
+  ))
+
   return (
     <>
       <h1>{titulo}</h1>
@@ -33,17 +36,9 @@ export function ListaDeSecao({
       {itens.length === 0 ? (
         <p className="narrow">Nada publicado nesta seção no momento.</p>
       ) : tipo === 'evento' ? (
-        <div className={css.doisPorLinha}>
-          {itens.map((i) => <CardEvento key={i.id} publicacao={i} />)}
-        </div>
+        <div className={css.doisPorLinha}>{itensDaLista}</div>
       ) : (
-        <div className={css.lista}>
-          {itens.map((i) =>
-            tipo === 'aviso' ? <LinhaAviso key={i.id} publicacao={i} />
-            : tipo === 'prazo' ? <LinhaPrazo key={i.id} publicacao={i} agora={agora} />
-            : <NotaComunidade key={i.id} publicacao={i} variante="compacta" />,
-          )}
-        </div>
+        <div className={css.lista}>{itensDaLista}</div>
       )}
     </>
   )

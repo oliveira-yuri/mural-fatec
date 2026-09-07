@@ -29,6 +29,32 @@ export function precisaDeBancoEmMemoria(url: string | undefined): boolean {
   return !url || url === URL_PLACEHOLDER
 }
 
+/**
+ * Mensagem do erro que barra o banco em memória em produção. Exportada para
+ * que o teste compare com o mesmo literal em vez de repeti-lo.
+ */
+export const ERRO_PRODUCAO_SEM_BANCO = [
+  'Produção exige uma DATABASE_URL de verdade.',
+  'DATABASE_URL está ausente ou ainda com o valor de exemplo, e em produção',
+  'o mural NÃO sobe um banco em memória: ele serviria o conteúdo de exemplo',
+  '(comunicados inventados e nomes de alunos fictícios) como se fosse',
+  'institucional. Defina DATABASE_URL no ambiente e faça o deploy de novo.',
+].join(' ')
+
+/**
+ * O banco em memória vale em desenvolvimento e em teste, e só ali.
+ *
+ * Em produção ele é pior do que a falta de banco: as páginas do mural são
+ * estáticas (`revalidate = 300`), então o `next build` prerenderizaria a home
+ * inteira com o conteúdo do seed — avisos que ninguém publicou e nomes de
+ * alunos que a spec §16.5 marca como fictícios — e o único sinal seria um
+ * `console.warn` no log de build, que ninguém lê. Uma build que falha é
+ * barata; um mural institucional com aviso falso não é.
+ */
+export function permiteBancoEmMemoria(ambiente: string | undefined): boolean {
+  return ambiente !== 'production'
+}
+
 function avisarBancoEmMemoria(): void {
   const linhas = [
     'BANCO DE DESENVOLVIMENTO EM MEMÓRIA',
@@ -87,6 +113,10 @@ async function montarDb(): Promise<Db> {
     return drizzle(conexao, { schema })
   }
 
+  if (!permiteBancoEmMemoria(process.env.NODE_ENV)) {
+    throw new Error(ERRO_PRODUCAO_SEM_BANCO)
+  }
+
   return montarBancoEmMemoria()
 }
 
@@ -114,6 +144,9 @@ interface GlobalComDb {
  * devolve a conexão postgres-js de sempre. Caso contrário, sobe um Postgres
  * PGlite em memória, aplica as migrações e semeia — com um aviso obrigatório
  * no console, para nunca ser confundido com um banco de verdade.
+ *
+ * Em produção (`NODE_ENV === 'production'`) esse caso contrário não existe:
+ * lança, em vez de inventar um mural. Ver `permiteBancoEmMemoria`.
  */
 export async function obterDb(): Promise<Db> {
   const g = globalThis as GlobalComDb

@@ -113,7 +113,41 @@ describe('ListaDeSecao', () => {
       criarPublicacao({ id: '3', slug: 'aviso-b', tipo: 'aviso', titulo: 'Segundo aviso' }),
     ]
     render(<ListaDeSecao itens={itens} tipo="aviso" titulo="Avisos" descricao="Descrição." agora={agora} />)
-    const titulos = screen.getAllByRole('heading', { level: 3 }).map((el) => el.textContent)
+    // Nível 2, e não 3: nesta página o <h1> é o título da seção e não há
+    // TituloSecao no meio, então os itens são <h2>. Ver ListaDeSecao.
+    const titulos = screen.getAllByRole('heading', { level: 2 }).map((el) => el.textContent)
     expect(titulos).toEqual(['Terceiro aviso', 'Primeiro aviso', 'Segundo aviso'])
+  })
+
+  it('não pula nível de título: h1 da página e h2 nos itens, sem h3', () => {
+    const itens = [criarPublicacao({ id: '1', slug: 'aviso-a', tipo: 'aviso', titulo: 'Um aviso' })]
+    render(<ListaDeSecao itens={itens} tipo="aviso" titulo="Avisos" descricao="Descrição." agora={agora} />)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Avisos')
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Um aviso')
+    expect(screen.queryByRole('heading', { level: 3 })).not.toBeInTheDocument()
+  })
+
+  it('despacha cada tipo para o componente certo, inclusive aviso e notícia', () => {
+    const aviso = criarPublicacao({ id: '1', slug: 'a', tipo: 'aviso', titulo: 'Aviso', urgencia: 'urgente' })
+    render(<ListaDeSecao itens={[aviso]} tipo="aviso" titulo="Avisos" descricao="Descrição." agora={agora} />)
+    expect(screen.getByText('Urgente')).toBeInTheDocument()
+  })
+
+  it('notícia na listagem sai na variante compacta, sem resumo nem foto', () => {
+    const noticia = criarPublicacao({
+      id: '1',
+      slug: 'n',
+      tipo: 'noticia',
+      titulo: 'Equipe de ADS fica em terceiro',
+      resumo: 'Vaga garantida na final nacional.',
+      imagemUrl: 'https://exemplo.org/equipe.jpg',
+      imagemAlt: 'Equipe',
+    })
+    const { container } = render(
+      <ListaDeSecao itens={[noticia]} tipo="noticia" titulo="Comunidade" descricao="Descrição." agora={agora} />,
+    )
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Equipe de ADS')
+    expect(screen.queryByText('Vaga garantida na final nacional.')).not.toBeInTheDocument()
+    expect(container.querySelector('img')).toBeNull()
   })
 })

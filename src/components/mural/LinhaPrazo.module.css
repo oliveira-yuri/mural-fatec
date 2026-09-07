@@ -40,4 +40,11 @@
   color: var(--papel);
 }
 
-.falta[data-estado='vencido'] { opacity: 0.65; }
+/* Cor sólida, não opacity: o opacity 0.65 apagava o selo inteiro sobre o
+   branco e deixava o texto "Encerrado" (13px, negrito) em 2,7:1 — reprovado
+   nos 4,5:1 da §12. O fundo lavado dá o mesmo ar de encerrado com --cinza
+   sobre --lavado em 5,1:1. */
+.falta[data-estado='vencido'] {
+  background: var(--lavado);
+  color: var(--cinza);
+}

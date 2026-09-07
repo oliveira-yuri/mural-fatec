@@ -60,6 +60,15 @@ describe('filtros combinados', () => {
     expect(itens.every((i) => i.tipo === 'evento')).toBe(true)
   })
 
+  it('curso que não existe devolve zero, em vez de desligar o filtro em silêncio', async () => {
+    const todos = await buscar(ctx.db, filtros(), agora)
+    expect(todos.total).toBeGreaterThan(0)
+
+    const { itens, total } = await buscar(ctx.db, filtros({ curso: 'curso-que-nao-existe' }), agora)
+    expect(total).toBe(0)
+    expect(itens).toHaveLength(0)
+  })
+
   it('filtra por curso, incluindo o que não tem curso marcado', async () => {
     const { itens } = await buscar(ctx.db, filtros({ curso: 'gestao-empresarial' }), agora)
     const semCurso = itens.filter((i) => i.cursos.length === 0)

@@ -1,4 +1,5 @@
-import type { Filtros } from '@/lib/busca/filtros'
+import { PERIODOS, ROTULO_PERIODO, type Filtros } from '@/lib/busca/filtros'
+import { ROTULO_TIPO_PLURAL, TIPOS_PUBLICACAO } from '@/lib/publicacoes/tipos'
 import css from './BarraFiltros.module.css'
 
 export function BarraFiltros({
@@ -31,19 +32,18 @@ export function BarraFiltros({
             <label htmlFor="f-tipo">Tipo</label>
             <select id="f-tipo" name="tipo" defaultValue={filtros.tipo ?? ''}>
               <option value="">Todos os tipos</option>
-              <option value="aviso">Avisos</option>
-              <option value="evento">Eventos</option>
-              <option value="prazo">Prazos</option>
-              <option value="noticia">Comunidade</option>
+              {TIPOS_PUBLICACAO.map((t) => (
+                <option key={t} value={t}>{ROTULO_TIPO_PLURAL[t]}</option>
+              ))}
             </select>
           </p>
 
           <p className={css.campo}>
             <label htmlFor="f-periodo">Período</label>
             <select id="f-periodo" name="periodo" defaultValue={filtros.periodo}>
-              <option value="semana">Esta semana</option>
-              <option value="trinta">Próximos 30 dias</option>
-              <option value="qualquer">Qualquer data</option>
+              {PERIODOS.map((p) => (
+                <option key={p} value={p}>{ROTULO_PERIODO[p]}</option>
+              ))}
             </select>
           </p>
 

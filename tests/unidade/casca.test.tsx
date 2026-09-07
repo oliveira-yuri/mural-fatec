@@ -46,14 +46,31 @@ describe('Navegacao', () => {
 })
 
 describe('Rodape', () => {
+  const CURSOS = [
+    { nome: 'Análise e Desenvolvimento de Sistemas', slug: 'analise-e-desenvolvimento-de-sistemas' },
+    { nome: 'Gestão Empresarial', slug: 'gestao-empresarial' },
+  ]
+
   it('agrupa links em colunas com título', () => {
-    render(<Rodape />)
+    render(<Rodape cursos={CURSOS} />)
     expect(screen.getByRole('heading', { name: 'O mural' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Por curso' })).toBeInTheDocument()
   })
 
   it('identifica a instituição', () => {
-    render(<Rodape />)
+    render(<Rodape cursos={CURSOS} />)
     expect(screen.getByText(/Centro Paula Souza/)).toBeInTheDocument()
+  })
+
+  it('monta os links de curso a partir dos cursos recebidos, não de slugs fixos', () => {
+    render(<Rodape cursos={[{ nome: 'Segurança da Informação', slug: 'si-noturno' }]} />)
+    expect(screen.getByRole('link', { name: 'Segurança da Informação' }))
+      .toHaveAttribute('href', '/buscar?curso=si-noturno')
+    expect(screen.queryByRole('link', { name: 'Gestão Empresarial' })).not.toBeInTheDocument()
+  })
+
+  it('sem cursos cadastrados, não mostra uma coluna "Por curso" vazia', () => {
+    render(<Rodape cursos={[]} />)
+    expect(screen.queryByRole('heading', { name: 'Por curso' })).not.toBeInTheDocument()
   })
 })

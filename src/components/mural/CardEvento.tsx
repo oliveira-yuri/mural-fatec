@@ -5,10 +5,18 @@ import {
   paraAtributoDatetime,
 } from '@/lib/formato/datas'
 import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
+import { NIVEL_PADRAO, type NivelTitulo } from './nivelTitulo'
 import css from './CardEvento.module.css'
 
-export function CardEvento({ publicacao }: { publicacao: PublicacaoDoMural }) {
+export function CardEvento({
+  publicacao,
+  nivel = NIVEL_PADRAO,
+}: {
+  publicacao: PublicacaoDoMural
+  nivel?: NivelTitulo
+}) {
   const inicio = publicacao.inicioEm
+  const Titulo = `h${nivel}` as const
   return (
     <Link className={css.card} href={`/p/${publicacao.slug}`}>
       {publicacao.imagemUrl ? (
@@ -21,7 +29,7 @@ export function CardEvento({ publicacao }: { publicacao: PublicacaoDoMural }) {
         </p>
       ) : null}
 
-      <h3 className={css.titulo}>{publicacao.titulo}</h3>
+      <Titulo className={css.titulo}>{publicacao.titulo}</Titulo>
       <p className={`narrow ${css.resumo}`}>{publicacao.resumo}</p>
 
       <dl className={`narrow ${css.fatos}`}>

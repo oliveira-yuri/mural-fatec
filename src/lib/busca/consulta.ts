@@ -67,6 +67,14 @@ async function condicao(db: Db, f: Filtros, agora: Date): Promise<SQL | undefine
           sql`${publicacoes.id} not in ${semNenhumCurso}`,
         ),
       )
+    } else {
+      // Slug de curso que não existe — link antigo, URL editada à mão, lista
+      // de cursos que mudou (a §16.1 da spec avisa que ela vai mudar). Antes
+      // a condição era simplesmente ignorada e a busca devolvia o mural
+      // inteiro, enquanto a ficha na tela dizia que o filtro estava ativo: a
+      // interface afirmava um recorte que não tinha aplicado. Zero resultado
+      // é a resposta honesta, e a tela vazia explica que o curso não existe.
+      partes.push(sql`false`)
     }
   }
 

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Archivo, Archivo_Narrow } from 'next/font/google'
 import { BarraServicos } from '@/components/layout/BarraServicos'
 import { Cabecalho } from '@/components/layout/Cabecalho'
-import { Rodape } from '@/components/layout/Rodape'
+import { RodapeDoMural } from '@/components/layout/RodapeDoMural'
 import './globals.css'
 
 const fonteArchivo = Archivo({
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BarraServicos />
         <Cabecalho />
         {children}
-        <Rodape />
+        <RodapeDoMural />
       </body>
     </html>
   )

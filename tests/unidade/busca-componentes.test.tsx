@@ -87,6 +87,32 @@ describe('EstadoVazio', () => {
       .toHaveTextContent('Nenhuma publicação de Segurança da Informação nesta semana')
   })
 
+  it('sem filtro de curso, a contagem não fala de curso nenhum', () => {
+    render(
+      <EstadoVazio
+        filtros={{ ...FILTROS_PADRAO, tipo: 'evento', periodo: 'semana' }}
+        nomesDeCurso={NOMES}
+        saidas={{ semPeriodo: 6, semTipo: 3, semCurso: 0 }}
+      />,
+    )
+    expect(screen.getByText(/6 eventos mais adiante no calendário/)).toBeInTheDocument()
+    expect(screen.queryByText(/desse curso/)).not.toBeInTheDocument()
+  })
+
+  it('curso que não existe: diz isso, em vez de repetir o slug como nome', () => {
+    render(
+      <EstadoVazio
+        filtros={{ ...FILTROS_PADRAO, curso: 'curso-que-nao-existe', periodo: 'qualquer' }}
+        nomesDeCurso={NOMES}
+        saidas={{ semPeriodo: 0, semTipo: 0, semCurso: 9 }}
+      />,
+    )
+    expect(screen.getByText(/não está na lista de cursos do mural/)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Nenhuma publicação')
+    expect(screen.getByRole('heading', { level: 2 })).not.toHaveTextContent('curso-que-nao-existe')
+    expect(screen.getByRole('link', { name: /Ver todos os cursos \(9\)/ })).toBeInTheDocument()
+  })
+
   it('usa o gênero certo para notícia', () => {
     render(
       <EstadoVazio

@@ -52,6 +52,11 @@ describe('semFiltro', () => {
     expect(semFiltro(f, 'curso')).toEqual({ ...FILTROS_PADRAO, q: 'tcc', curso: null })
   })
 
+  it('devolve os filtros sem o termo de busca', () => {
+    const f = { ...FILTROS_PADRAO, q: 'monitoria', curso: 'ads' }
+    expect(semFiltro(f, 'q')).toEqual({ ...FILTROS_PADRAO, q: '', curso: 'ads' })
+  })
+
   it('devolve o período ao padrão', () => {
     const f = { ...FILTROS_PADRAO, periodo: 'semana' as const }
     expect(semFiltro(f, 'periodo').periodo).toBe('trinta')
@@ -80,6 +85,19 @@ describe('descreverAtivos', () => {
     const ativos = descreverAtivos({ ...FILTROS_PADRAO, curso: 'ads', tipo: 'evento' }, nomes)
     const doCurso = ativos.find((a) => a.chave === 'curso')
     expect(doCurso?.href).toBe('/buscar?tipo=evento')
+  })
+
+  it('mostra o termo de busca como ficha removível', () => {
+    const ativos = descreverAtivos({ ...FILTROS_PADRAO, q: 'monitoria' }, nomes)
+    expect(ativos).toHaveLength(1)
+    expect(ativos[0].chave).toBe('q')
+    expect(ativos[0].rotulo).toBe('Busca: “monitoria”')
+  })
+
+  it('o link da ficha de busca remove só o termo', () => {
+    const ativos = descreverAtivos({ ...FILTROS_PADRAO, q: 'monitoria', tipo: 'evento' }, nomes)
+    const daBusca = ativos.find((a) => a.chave === 'q')
+    expect(daBusca?.href).toBe('/buscar?tipo=evento')
   })
 
   it('descreve o período por extenso', () => {

@@ -86,6 +86,60 @@ describe('texto alternativo', () => {
   })
 })
 
+/**
+ * Uma entrada mínima válida de cada tipo. O alt obrigatório vive no
+ * superRefine da união, então vale para os quatro por construção — mas a
+ * garantia de acessibilidade mais importante do produto não pode depender de
+ * alguém ler o superRefine e entender Zod.
+ */
+const MINIMO: Record<string, Record<string, unknown>> = {
+  aviso: aviso(),
+  evento: evento(),
+  prazo: {
+    tipo: 'prazo',
+    titulo: 'Inscrição em disciplinas',
+    resumo: 'Pelo SIGA.',
+    corpo: 'Detalhes no edital.',
+    setorId: SETOR,
+    expiraEm: new Date('2026-10-08T12:00:00Z'),
+    prazoFinal: new Date('2026-09-30T12:00:00Z'),
+  },
+  noticia: {
+    tipo: 'noticia',
+    titulo: 'Equipe de ADS fica em terceiro na Maratona',
+    resumo: 'Vaga garantida na final nacional.',
+    corpo: 'Os três alunos disputaram a etapa regional.',
+    setorId: SETOR,
+    expiraEm: new Date('2026-12-08T12:00:00Z'),
+  },
+}
+
+describe.each(['aviso', 'evento', 'prazo', 'noticia'])('texto alternativo em %s', (tipo) => {
+  const base = MINIMO[tipo]
+
+  it('recusa imagem sem descrição', () => {
+    const r = schema.safeParse({ ...base, imagemUrl: 'https://exemplo.org/foto.jpg' })
+    expect(r.success).toBe(false)
+    if (!r.success) {
+      expect(r.error.issues.some((i) => i.path.includes('imagemAlt'))).toBe(true)
+    }
+  })
+
+  it('recusa descrição só de espaços', () => {
+    const r = schema.safeParse({ ...base, imagemUrl: 'https://exemplo.org/foto.jpg', imagemAlt: '   ' })
+    expect(r.success).toBe(false)
+  })
+
+  it('aceita imagem com descrição', () => {
+    const r = schema.safeParse({
+      ...base,
+      imagemUrl: 'https://exemplo.org/foto.jpg',
+      imagemAlt: 'Estudantes no pátio central da Fatec Campinas',
+    })
+    expect(r.success).toBe(true)
+  })
+})
+
 describe('campos por tipo', () => {
   it('aceita evento completo', () => {
     expect(schema.safeParse(evento()).success).toBe(true)

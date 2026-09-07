@@ -1,17 +1,21 @@
 import Link from 'next/link'
 import { formatarDataCompleta, paraAtributoDatetime } from '@/lib/formato/datas'
 import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
+import { NIVEL_PADRAO, type NivelTitulo } from './nivelTitulo'
 import css from './NotaComunidade.module.css'
 
 export function NotaComunidade({
   publicacao,
   variante,
+  nivel = NIVEL_PADRAO,
 }: {
   publicacao: PublicacaoDoMural
   variante: 'destaque' | 'compacta'
+  nivel?: NivelTitulo
 }) {
   const data = publicacao.publicadoEm ?? publicacao.criadoEm
   const href = `/p/${publicacao.slug}`
+  const Titulo = `h${nivel}` as const
 
   if (variante === 'compacta') {
     return (
@@ -21,7 +25,7 @@ export function NotaComunidade({
           {' — '}
           {publicacao.setor.nome}
         </span>
-        <h3 className={css.manchete}>{publicacao.titulo}</h3>
+        <Titulo className={css.manchete}>{publicacao.titulo}</Titulo>
       </Link>
     )
   }
@@ -38,7 +42,7 @@ export function NotaComunidade({
           ) : null}
         </figure>
       ) : null}
-      <h3 className={css.titulo}>{publicacao.titulo}</h3>
+      <Titulo className={css.titulo}>{publicacao.titulo}</Titulo>
       <p className={`narrow ${css.resumo}`}>{publicacao.resumo}</p>
       <p className={`narrow ${css.credito}`}>
         {publicacao.pessoasCitadas ? <strong>{publicacao.pessoasCitadas}</strong> : null}

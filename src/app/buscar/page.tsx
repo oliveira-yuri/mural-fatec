@@ -5,10 +5,7 @@ import { Navegacao } from '@/components/layout/Navegacao'
 import { BarraFiltros } from '@/components/busca/BarraFiltros'
 import { FichasAtivas } from '@/components/busca/FichasAtivas'
 import { EstadoVazio } from '@/components/busca/EstadoVazio'
-import { LinhaAviso } from '@/components/mural/LinhaAviso'
-import { CardEvento } from '@/components/mural/CardEvento'
-import { LinhaPrazo } from '@/components/mural/LinhaPrazo'
-import { NotaComunidade } from '@/components/mural/NotaComunidade'
+import { ItemDoMural } from '@/components/mural/ItemDoMural'
 import css from '@/app/pagina.module.css'
 import cssBusca from './pagina.module.css'
 
@@ -47,12 +44,12 @@ export default async function Buscar({
           <EstadoVazio filtros={filtros} nomesDeCurso={nomesDeCurso} saidas={saidas} />
         ) : (
           <div className={css.lista}>
-            {resultado.itens.map((i) =>
-              i.tipo === 'evento' ? <CardEvento key={i.id} publicacao={i} />
-              : i.tipo === 'prazo' ? <LinhaPrazo key={i.id} publicacao={i} agora={agora} />
-              : i.tipo === 'noticia' ? <NotaComunidade key={i.id} publicacao={i} variante="compacta" />
-              : <LinhaAviso key={i.id} publicacao={i} />,
-            )}
+            {/* O `<h1>` desta página é a contagem de resultados, e não há
+                seção intermediária: os itens entram em `<h2>` para não pular
+                nível. */}
+            {resultado.itens.map((i) => (
+              <ItemDoMural key={i.id} publicacao={i} agora={agora} nivel={2} />
+            ))}
           </div>
         )}
       </main>

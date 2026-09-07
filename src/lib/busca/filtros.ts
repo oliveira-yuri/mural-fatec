@@ -1,4 +1,4 @@
-import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
+import { ROTULO_TIPO_PLURAL, TIPOS_PUBLICACAO, type TipoPublicacao } from '@/lib/publicacoes/tipos'
 
 export type Periodo = 'semana' | 'trinta' | 'qualquer'
 export type Ordem = 'recentes' | 'prazo'
@@ -19,8 +19,7 @@ export const FILTROS_PADRAO: Filtros = {
   ordem: 'recentes',
 }
 
-const TIPOS: TipoPublicacao[] = ['aviso', 'evento', 'prazo', 'noticia']
-const PERIODOS: Periodo[] = ['semana', 'trinta', 'qualquer']
+export const PERIODOS: Periodo[] = ['semana', 'trinta', 'qualquer']
 const ORDENS: Ordem[] = ['recentes', 'prazo']
 
 export const ROTULO_PERIODO: Record<Periodo, string> = {
@@ -43,7 +42,7 @@ export function lerFiltros(params: Record<string, string | string[] | undefined>
   return {
     q: primeiro(params.q).trim(),
     curso: curso === '' ? null : curso,
-    tipo: TIPOS.includes(tipo) ? tipo : null,
+    tipo: TIPOS_PUBLICACAO.includes(tipo) ? tipo : null,
     periodo: PERIODOS.includes(periodo) ? periodo : FILTROS_PADRAO.periodo,
     ordem: ORDENS.includes(ordem) ? ordem : FILTROS_PADRAO.ordem,
   }
@@ -59,12 +58,18 @@ export function escreverFiltros(f: Filtros): string {
   return p.toString()
 }
 
-export function semFiltro(f: Filtros, chave: 'curso' | 'tipo' | 'periodo'): Filtros {
+/** Qual filtro uma ficha remove. O termo de busca é um filtro como os outros. */
+export type ChaveDeFiltro = 'q' | 'curso' | 'tipo' | 'periodo'
+
+export function semFiltro(f: Filtros, chave: ChaveDeFiltro): Filtros {
   if (chave === 'periodo') return { ...f, periodo: FILTROS_PADRAO.periodo }
+  if (chave === 'q') return { ...f, q: '' }
   return { ...f, [chave]: null }
 }
 
-function comQuery(f: Filtros): string {
+/** URL de /buscar com estes filtros. Exportada para que a tela vazia use a
+ *  mesma função, em vez da cópia byte a byte que ela tinha. */
+export function comQuery(f: Filtros): string {
   const qs = escreverFiltros(f)
   return qs ? `/buscar?${qs}` : '/buscar'
 }
@@ -72,16 +77,19 @@ function comQuery(f: Filtros): string {
 export function descreverAtivos(
   f: Filtros,
   nomesDeCurso: Record<string, string>,
-): { chave: 'curso' | 'tipo' | 'periodo'; rotulo: string; href: string }[] {
-  const rotuloTipo: Record<TipoPublicacao, string> = {
-    aviso: 'Avisos',
-    evento: 'Eventos',
-    prazo: 'Prazos',
-    noticia: 'Comunidade',
+): { chave: ChaveDeFiltro; rotulo: string; href: string }[] {
+  const fichas: { chave: ChaveDeFiltro; rotulo: string; href: string }[] = []
+
+  // O termo entra como ficha igual às outras: quem chega pela busca do
+  // cabeçalho via lista recortada e "nenhum filtro ativo", que é o oposto do
+  // que a seção de filtros ativos existe para evitar (spec §7).
+  if (f.q) {
+    fichas.push({
+      chave: 'q',
+      rotulo: `Busca: “${f.q}”`,
+      href: comQuery(semFiltro(f, 'q')),
+    })
   }
-
-  const fichas: { chave: 'curso' | 'tipo' | 'periodo'; rotulo: string; href: string }[] = []
-
   if (f.curso) {
     fichas.push({
       chave: 'curso',
@@ -92,7 +100,7 @@ export function descreverAtivos(
   if (f.tipo) {
     fichas.push({
       chave: 'tipo',
-      rotulo: `Tipo: ${rotuloTipo[f.tipo]}`,
+      rotulo: `Tipo: ${ROTULO_TIPO_PLURAL[f.tipo]}`,
       href: comQuery(semFiltro(f, 'tipo')),
     })
   }

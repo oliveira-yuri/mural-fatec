@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { escreverFiltros, semFiltro, type Filtros, type Periodo } from '@/lib/busca/filtros'
+import { comQuery, semFiltro, type Filtros, type Periodo } from '@/lib/busca/filtros'
 import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import css from './EstadoVazio.module.css'
 
@@ -27,11 +27,6 @@ const NA_FRASE: Record<TipoPublicacao, { artigo: string; nome: string }> = {
 
 const SEM_TIPO = { artigo: 'Nenhuma', nome: 'publicação' }
 
-function href(f: Filtros): string {
-  const qs = escreverFiltros(f)
-  return qs ? `/buscar?${qs}` : '/buscar'
-}
-
 export function EstadoVazio({
   filtros,
   nomesDeCurso,
@@ -43,7 +38,11 @@ export function EstadoVazio({
 }) {
   const { artigo, nome: nomeTipo } = filtros.tipo ? NA_FRASE[filtros.tipo] : SEM_TIPO
   const plural = filtros.tipo ? `${nomeTipo}s` : 'publicações'
-  const nomeCurso = filtros.curso ? nomesDeCurso[filtros.curso] ?? filtros.curso : null
+  // Curso pedido que não existe na lista de cursos: a busca devolve zero de
+  // propósito (`consulta.ts`), e aqui a tela precisa dizer por quê, em vez de
+  // repetir o slug como se fosse nome de curso.
+  const cursoDesconhecido = filtros.curso !== null && !(filtros.curso in nomesDeCurso)
+  const nomeCurso = filtros.curso && !cursoDesconhecido ? nomesDeCurso[filtros.curso] : null
 
   const titulo = [
     `${artigo} ${nomeTipo}`,
@@ -54,9 +53,12 @@ export function EstadoVazio({
     .filter(Boolean)
     .join(' ')
 
+  // Cada pedaço da frase só entra com o filtro correspondente ativo: sem
+  // isto, quem buscava sem escolher curso lia "Há 6 eventos desse curso mais
+  // adiante no calendário" sem ter escolhido curso nenhum.
   const partes = [
     saidas.semPeriodo > 0
-      ? `Há ${saidas.semPeriodo} ${plural} desse curso mais adiante no calendário`
+      ? `Há ${saidas.semPeriodo} ${plural}${nomeCurso ? ' desse curso' : ''} mais adiante no calendário`
       : null,
     saidas.semTipo > 0 ? `${saidas.semTipo} publicações de outros tipos no mesmo recorte` : null,
   ].filter(Boolean)
@@ -64,19 +66,24 @@ export function EstadoVazio({
   return (
     <div className={css.vazio}>
       <h2 className={css.titulo}>{titulo}</h2>
+      {cursoDesconhecido ? (
+        <p className={`narrow ${css.linha}`}>
+          O curso “{filtros.curso}” não está na lista de cursos do mural.
+        </p>
+      ) : null}
       {partes.length > 0 ? <p className={`narrow ${css.linha}`}>{partes.join(', e ')}.</p> : null}
 
       <div className={css.saidas}>
         {saidas.semPeriodo > 0 ? (
-          <Link href={href({ ...semFiltro(filtros, 'periodo'), periodo: 'qualquer' })}>
+          <Link href={comQuery({ ...semFiltro(filtros, 'periodo'), periodo: 'qualquer' })}>
             Ver qualquer data ({saidas.semPeriodo})
           </Link>
         ) : null}
         {saidas.semTipo > 0 ? (
-          <Link href={href(semFiltro(filtros, 'tipo'))}>Incluir outros tipos ({saidas.semTipo})</Link>
+          <Link href={comQuery(semFiltro(filtros, 'tipo'))}>Incluir outros tipos ({saidas.semTipo})</Link>
         ) : null}
         {saidas.semCurso > 0 && filtros.curso ? (
-          <Link href={href(semFiltro(filtros, 'curso'))}>Ver todos os cursos ({saidas.semCurso})</Link>
+          <Link href={comQuery(semFiltro(filtros, 'curso'))}>Ver todos os cursos ({saidas.semCurso})</Link>
         ) : null}
         <Link href="/buscar">Limpar tudo</Link>
       </div>

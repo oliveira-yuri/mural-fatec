@@ -81,6 +81,50 @@ describe('buscarPorSlug', () => {
   })
 })
 
+describe('buscarPorSlug — status', () => {
+  // Só rascunho, em revisão e arquivado precisam ser inseridos: nenhum deles
+  // entra em `vigente()`, então as contagens dos outros testes não mudam.
+  // O caso `publicado` usa uma peça do próprio seed.
+  beforeAll(async () => {
+    const [setor] = await ctx.db.select().from(setores).limit(1)
+    const [autor] = await ctx.db.select().from(usuarios).limit(1)
+
+    const comum = {
+      tipo: 'aviso' as const,
+      resumo: 'Peça de teste dos status.',
+      corpo: 'Corpo de teste.',
+      setorId: setor.id,
+      autorId: autor.id,
+      publicadoEm: agora,
+      expiraEm: addDays(agora, 30),
+    }
+
+    await ctx.db.insert(publicacoes).values([
+      { ...comum, slug: 'peca-em-rascunho', titulo: 'Peça em rascunho', status: 'rascunho' },
+      { ...comum, slug: 'peca-em-revisao', titulo: 'Peça em revisão', status: 'em_revisao' },
+      { ...comum, slug: 'peca-arquivada', titulo: 'Peça arquivada', status: 'arquivado' },
+    ])
+  })
+
+  it('serve uma publicação publicada', async () => {
+    const p = await buscarPorSlug(ctx.db, 'feira-de-estagios-e-primeiro-emprego')
+    expect(p?.status).toBe('publicado')
+  })
+
+  it('serve uma publicação arquivada, porque a URL citada em edital não pode quebrar', async () => {
+    const p = await buscarPorSlug(ctx.db, 'peca-arquivada')
+    expect(p?.status).toBe('arquivado')
+  })
+
+  it('não serve rascunho, mesmo com o slug adivinhado pelo título', async () => {
+    expect(await buscarPorSlug(ctx.db, 'peca-em-rascunho')).toBeNull()
+  })
+
+  it('não serve publicação em revisão, para não furar a fila de aprovação', async () => {
+    expect(await buscarPorSlug(ctx.db, 'peca-em-revisao')).toBeNull()
+  })
+})
+
 describe('contarVigentes', () => {
   it('conta só o que está no mural agora', async () => {
     expect(await contarVigentes(ctx.db, agora)).toBe(8)
