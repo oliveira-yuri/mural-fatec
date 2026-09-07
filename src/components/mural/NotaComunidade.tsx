@@ -29,7 +29,14 @@ export function NotaComunidade({
   return (
     <Link className={css.destaque} href={href}>
       {publicacao.imagemUrl ? (
-        <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+        <figure className={css.figura}>
+          <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+          {publicacao.creditoFoto ? (
+            <figcaption className={`narrow ${css.creditoFoto}`}>
+              Foto: {publicacao.creditoFoto}
+            </figcaption>
+          ) : null}
+        </figure>
       ) : null}
       <h3 className={css.titulo}>{publicacao.titulo}</h3>
       <p className={`narrow ${css.resumo}`}>{publicacao.resumo}</p>

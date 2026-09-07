@@ -84,6 +84,11 @@ describe('CardEvento', () => {
     expect(container.querySelector('img')).toBeNull()
     expect(screen.getByText('Semana de Tecnologia')).toBeInTheDocument()
   })
+
+  it('mostra "0 restantes" quando o evento lotou, em vez de omitir', () => {
+    render(<CardEvento publicacao={criarPublicacao({ ...evento, vagasRestantes: 0 })} />)
+    expect(screen.getByText('0 restantes')).toBeInTheDocument()
+  })
 })
 
 describe('LinhaPrazo', () => {
@@ -126,6 +131,7 @@ describe('NotaComunidade', () => {
     pessoasCitadas: 'Marcela Tsuchiya, Ithalo Bandeira e Renan Sposito',
     imagemUrl: 'https://exemplo.org/equipe.jpg',
     imagemAlt: 'Três estudantes com o certificado',
+    creditoFoto: 'Assessoria de Comunicação',
   })
 
   it('na variante destaque, mostra foto, resumo e pessoas citadas', () => {
@@ -133,6 +139,17 @@ describe('NotaComunidade', () => {
     expect(screen.getByAltText('Três estudantes com o certificado')).toBeInTheDocument()
     expect(screen.getByText('Vaga garantida na final nacional.')).toBeInTheDocument()
     expect(screen.getByText(/Marcela Tsuchiya/)).toBeInTheDocument()
+  })
+
+  it('na variante destaque, mostra o crédito da fotografia', () => {
+    render(<NotaComunidade publicacao={nota} variante="destaque" />)
+    expect(screen.getByText('Foto: Assessoria de Comunicação')).toBeInTheDocument()
+  })
+
+  it('omite o crédito quando a foto não tem um', () => {
+    const semCredito = criarPublicacao({ ...nota, creditoFoto: null })
+    render(<NotaComunidade publicacao={semCredito} variante="destaque" />)
+    expect(screen.queryByText(/^Foto:/)).not.toBeInTheDocument()
   })
 
   it('na variante compacta, mostra só manchete e procedência', () => {
