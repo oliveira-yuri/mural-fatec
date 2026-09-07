@@ -1,0 +1,75 @@
+.topo { border-bottom: 3px solid var(--tijolo); }
+
+.faixa {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 18px;
+  padding-bottom: 16px;
+}
+
+.lockup { display: flex; align-items: center; gap: 16px; }
+
+.marca { line-height: 0.9; }
+
+.fatec {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--ardosia);
+}
+
+.unidade {
+  display: block;
+  font-size: 16.5px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--tijolo);
+  margin-top: 3px;
+}
+
+.divisor { width: 1px; align-self: stretch; background: var(--regra); }
+
+.nome { display: block; font-size: 21px; font-weight: 600; letter-spacing: -0.025em; }
+
+.desc {
+  display: block;
+  font-size: 12.5px;
+  color: var(--cinza);
+  margin-top: 4px;
+}
+
+.busca {
+  display: flex;
+  border: 1px solid var(--regra);
+  border-radius: var(--raio-controle);
+  overflow: hidden;
+}
+
+.busca input {
+  border: 0;
+  padding: 11px 14px;
+  width: 236px;
+  font: inherit;
+  font-size: 14px;
+  background: var(--papel);
+  color: var(--tinta);
+}
+
+.busca button {
+  border: 0;
+  background: var(--ardosia);
+  color: #fff;
+  padding: 0 17px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  transition: background 0.18s ease;
+}
+
+.busca button:hover { background: var(--ardosia-escura); }
+
+.rotuloOculto { position: absolute; left: -9999px; }
