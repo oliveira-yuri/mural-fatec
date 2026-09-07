@@ -42,7 +42,7 @@ Requisitos que valem para **todas** as tarefas. Valores copiados da spec.
 
 **Texto alternativo** — se `imagem_url` existe, `imagem_alt` é obrigatório. Validado no schema Zod, não por convenção.
 
-**Datas por extenso** no texto visível ("terça-feira, 23 de setembro"), sempre com o formato de máquina em `<time datetime="...">`.
+**Datas por extenso** no texto visível ("quarta-feira, 23 de setembro"), sempre com o formato de máquina em `<time datetime="...">`.
 
 **Fuso horário** — `America/Sao_Paulo` para toda conta de dias. O servidor pode rodar em UTC; nenhuma diferença de data pode depender disso.
 
@@ -139,15 +139,16 @@ Cria o projeto, os tokens de design, as fontes e o arranjo de testes. Ao final, 
 - [ ] **Step 1: Criar o projeto Next.js**
 
 ```bash
-npx create-next-app@latest . --typescript --app --no-tailwind --no-src-dir --import-alias "@/*" --eslint --use-npm
+npx create-next-app@latest . --typescript --app --no-tailwind --src-dir --import-alias "@/*" --eslint --use-npm
 ```
 
 Responder **não** para Turbopack se perguntado. O comando reclama de diretório não vazio: confirmar sobrescrita, os arquivos existentes (`docs/`, `.gitignore`, `.claude/`) são preservados.
 
-- [ ] **Step 2: Mover o código para `src/` e instalar as dependências**
+- [ ] **Step 2: Instalar as dependências**
+
+Com `--src-dir`, o create-next-app já cria `src/app` e mapeia `"@/*": ["./src/*"]` no tsconfig. Conferir esse mapeamento antes de seguir: sem ele, todo import `@/lib/...` quebra.
 
 ```bash
-mkdir -p src && mv app src/app
 npm install drizzle-orm postgres zod date-fns date-fns-tz react-markdown remark-gfm
 npm install -D drizzle-kit vitest @vitejs/plugin-react vite-tsconfig-paths @testing-library/react @testing-library/jest-dom jsdom @electric-sql/pglite dotenv tsx
 ```
@@ -387,7 +388,7 @@ O mural escreve data por extenso em todo lugar. Centralizar aqui evita que cada 
 **Interfaces:**
 - Consumes: nada
 - Produces:
-  - `formatarDataExtenso(d: Date): string` → `"terça-feira, 23 de setembro"`
+  - `formatarDataExtenso(d: Date): string` → `"quarta-feira, 23 de setembro"`
   - `formatarDataCurta(d: Date): string` → `"4 de setembro"`
   - `formatarDataCompleta(d: Date): string` → `"2 de setembro de 2026"`
   - `formatarHorario(inicio: Date, fim?: Date | null): string` → `"19h30 às 21h"`
@@ -413,7 +414,7 @@ const fimEvento = new Date('2026-09-24T00:00:00Z') // 21h00 em São Paulo
 
 describe('formatarDataExtenso', () => {
   it('escreve dia da semana, dia e mês', () => {
-    expect(formatarDataExtenso(evento)).toBe('terça-feira, 23 de setembro')
+    expect(formatarDataExtenso(evento)).toBe('quarta-feira, 23 de setembro')
   })
 })
 
@@ -2687,7 +2688,7 @@ describe('CardEvento', () => {
 
   it('escreve o dia da semana por extenso', () => {
     render(<CardEvento publicacao={evento} />)
-    expect(screen.getByText('terça-feira, 23 de setembro')).toBeInTheDocument()
+    expect(screen.getByText('quarta-feira, 23 de setembro')).toBeInTheDocument()
   })
 
   it('mostra horário, local e vagas', () => {
