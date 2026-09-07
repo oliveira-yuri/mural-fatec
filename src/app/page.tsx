@@ -1,4 +1,4 @@
-import { db } from '@/lib/db/client'
+import { obterDb } from '@/lib/db/client'
 import { listarMural, contarVigentes } from '@/lib/publicacoes/consultas'
 import { montarSecoesDaHome } from '@/lib/publicacoes/secoes'
 import { Navegacao } from '@/components/layout/Navegacao'
@@ -13,6 +13,7 @@ import css from './pagina.module.css'
 export const revalidate = 300
 
 export default async function Home() {
+  const db = await obterDb()
   const agora = new Date()
   const [itens, total] = await Promise.all([
     listarMural(db, agora),

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db/client'
+import { obterDb } from '@/lib/db/client'
 import { listarPorTipo } from '@/lib/publicacoes/consultas'
 import { ordenarSecao } from '@/lib/publicacoes/secoes'
 import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
@@ -16,6 +16,7 @@ export async function ListagemPorTipo({
   titulo: string
   descricao: string
 }) {
+  const db = await obterDb()
   const agora = new Date()
   // A mesma ordem das seções da home: prazo pela data-limite, evento pela
   // data em que acontece. A página de prazos promete "do que vence antes ao

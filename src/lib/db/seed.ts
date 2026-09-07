@@ -199,14 +199,28 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
 
 // Execução direta: npm run db:seed
 if (process.argv[1]?.includes('seed')) {
-  import('./client')
-    .then(({ db }) => semear(db))
-    .then(() => {
-      console.log('Mural semeado com 9 publicações.')
-      process.exit(0)
-    })
-    .catch((erro) => {
-      console.error(erro)
+  import('./client').then(({ obterDb, precisaDeBancoEmMemoria }) => {
+    // Sem DATABASE_URL real, obterDb() já sobe e semeia um banco em memória
+    // sozinho (é para isto que ele existe) — e este processo o descartaria
+    // no instante seguinte, ao sair. Semear por linha de comando só faz
+    // sentido contra um banco que sobrevive ao fim do processo.
+    if (precisaDeBancoEmMemoria(process.env.DATABASE_URL)) {
+      console.error(
+        'db:seed precisa de uma DATABASE_URL real. Sem ela o servidor de desenvolvimento já sobe com um banco em memória semeado.',
+      )
       process.exit(1)
-    })
+      return
+    }
+
+    return obterDb()
+      .then((db) => semear(db))
+      .then(() => {
+        console.log('Mural semeado com 9 publicações.')
+        process.exit(0)
+      })
+      .catch((erro) => {
+        console.error(erro)
+        process.exit(1)
+      })
+  })
 }

@@ -1,4 +1,4 @@
-import { db } from '@/lib/db/client'
+import { obterDb } from '@/lib/db/client'
 import { buscar, sugerirSaidas, listarCursos } from '@/lib/busca/consulta'
 import { lerFiltros } from '@/lib/busca/filtros'
 import { Navegacao } from '@/components/layout/Navegacao'
@@ -20,6 +20,7 @@ export default async function Buscar({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const db = await obterDb()
   const filtros = lerFiltros(await searchParams)
   const agora = new Date()
 
