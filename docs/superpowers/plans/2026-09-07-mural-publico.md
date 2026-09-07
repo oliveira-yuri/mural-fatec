@@ -36,6 +36,17 @@ Requisitos que valem para **todas** as tarefas. Valores copiados da spec.
 
 **Forma** — botões, campos e fichas com raio 7px; imagens 9px; selos e indicadores 4 a 6px; seções, filetes, listas e tabelas **sem raio**. Sem sombra de elevação.
 
+**Navegação interna usa `<Link>` do `next/link`.** `<a>` fica só para link externo,
+âncora e placeholder (`href="#"`). O `<Link>` renderiza um `<a href>` no HTML, então
+continua funcionando com JavaScript desligado — a navegação instantânea é ganho puro, sem
+perda. É também o que o `@next/next/no-html-link-for-pages` cobra, e manter o lint limpo é o
+que faz ele proteger os links seguintes.
+
+**Nenhum hex dentro de CSS Module.** Branco é `var(--papel)`, não `#fff`. O teste da
+Tarefa 1 trava a paleta lendo apenas o `globals.css`; um hex escrito num componente escapa
+dele e é como uma paleta começa a divergir. Variações com transparência
+(`rgba(255,255,255,.72)`) são permitidas, porque não existem como token.
+
 **Regra do hover** — nenhuma informação pode existir só no hover. Todo texto, data, autor e rótulo é legível com a página parada. Nesta fase o hover só muda cor de título.
 
 **Nada é apagado** — expiração é condição de consulta (`expira_em > agora()`), nunca `DELETE`. Publicação vencida sai da listagem e continua acessível por URL.
@@ -2296,7 +2307,7 @@ export function BarraServicos() {
   font-size: 12.5px;
 }
 
-.faixa a:hover { color: #fff; text-decoration: underline; }
+.faixa a:hover { color: var(--papel); text-decoration: underline; }
 
 .fim { margin-left: auto; }
 ```
@@ -2404,7 +2415,7 @@ export function Cabecalho() {
 .busca button {
   border: 0;
   background: var(--ardosia);
-  color: #fff;
+  color: var(--papel);
   padding: 0 17px;
   cursor: pointer;
   font: inherit;
@@ -2560,13 +2571,13 @@ export function Rodape() {
 
 .colunas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
 
-.titulo { font-size: 14px; font-weight: 600; color: #fff; margin: 0 0 13px; }
+.titulo { font-size: 14px; font-weight: 600; color: var(--papel); margin: 0 0 13px; }
 
 .pe ul { list-style: none; margin: 0; padding: 0; }
 
 .pe li { margin-bottom: 8px; font-size: 14.5px; line-height: 1.45; }
 
-.pe a:hover { color: #fff; text-decoration: underline; }
+.pe a:hover { color: var(--papel); text-decoration: underline; }
 
 .fim {
   border-top: 1px solid rgba(255, 255, 255, 0.16);
@@ -2944,7 +2955,7 @@ export function LinhaAviso({ publicacao }: { publicacao: PublicacaoDoMural }) {
 .selo {
   display: inline-block;
   background: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
   padding: 4px 8px;
   border-radius: var(--raio-selo);
   font-size: 11.5px;
@@ -3130,7 +3141,7 @@ export function LinhaPrazo({
 .falta[data-estado='apertado'] {
   background: var(--tijolo);
   border-color: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
 }
 
 .falta[data-estado='vencido'] { opacity: 0.65; }
@@ -3480,7 +3491,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.033em;
-  color: #fff;
+  color: var(--papel);
   margin: 0 0 13px;
 }
 
@@ -3497,7 +3508,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 .acao {
   display: inline-block;
   background: var(--tijolo);
-  color: #fff;
+  color: var(--papel);
   padding: 12px 20px;
   border-radius: var(--raio-controle);
   font-size: 14.5px;
@@ -3507,7 +3518,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 
 .acao:hover { background: var(--tijolo-escuro); }
 
-.claro { background: #fff; color: var(--ardosia-escura); }
+.claro { background: var(--papel); color: var(--ardosia-escura); }
 
 .claro:hover { background: #dfe5e8; }
 ```
@@ -4802,7 +4813,7 @@ export function BarraFiltros({
   border: 0;
   border-radius: var(--raio-controle);
   background: var(--ardosia);
-  color: #fff;
+  color: var(--papel);
   cursor: pointer;
   transition: background 0.18s ease;
 }
@@ -4861,7 +4872,7 @@ export function FichasAtivas({
   border-radius: 6px;
 }
 
-.ficha:hover { background: var(--ardosia); color: #fff; }
+.ficha:hover { background: var(--ardosia); color: var(--papel); }
 
 .x { font-size: 11px; }
 
