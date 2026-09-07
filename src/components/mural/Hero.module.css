@@ -1,13 +1,37 @@
-/* min-height porque a altura do hero vinha só da <img> de fundo, que é
-   opcional. Sem ela o elemento colapsava para zero e o véu, ancorado no
-   rodapé, subia por cima do cabeçalho e bloqueava o clique na busca. */
-.hero { position: relative; background: var(--ardosia-escura); min-height: 400px; }
+/* Grid de uma célula só: o véu é o único item de verdade da grade — a foto
+   sai do fluxo (position: absolute; inset: 0) e só preenche a área que o
+   véu já determinou, em vez de disputar a altura da linha com ele.
+   Isso importa porque `height: 100%` num item de grid cuja linha tem altura
+   automática NÃO resolve contra um valor definido — o CSS trata a
+   porcentagem como indefinida e a imagem volta a usar a proporção
+   intrínseca dela. Testei a primeira versão desta correção (fundo como
+   item de grid comum, com `height: 100%`) com uma imagem quadrada de
+   verificação: o hero inchou para 1280px de altura (a largura inteira,
+   porque a imagem é 1:1) em vez de ficar em 400px. Qualquer foto real
+   também estouraria — nenhuma tem a proporção ultra-larga de 1280:400, e a
+   maioria (retrato, 4:3, 16:9) resultaria em algo entre 720px e 1280px de
+   altura no lugar de 400px. Com a foto em position: absolute, ela nunca
+   disputa a altura da linha — só preenche, via object-fit: cover, a altura
+   que o véu (o item real da grade) já fixou. */
+.hero {
+  position: relative;
+  display: grid;
+  background: var(--ardosia-escura);
+  min-height: 400px;
+}
 
-.fundo { width: 100%; height: 400px; object-fit: cover; opacity: 0.44; }
+.fundo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.44;
+}
 
 .veu {
-  position: absolute;
-  inset: auto 0 0 0;
+  grid-area: 1 / 1;
+  align-self: end;
   background: linear-gradient(to top, rgba(51, 69, 78, 0.94) 12%, rgba(51, 69, 78, 0));
   padding-top: 66px;
   padding-bottom: 34px;

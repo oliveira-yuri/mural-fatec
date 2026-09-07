@@ -1,4 +1,18 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Locator } from '@playwright/test'
+
+/**
+ * toBeVisible() sozinho não basta: a definição de "visible" do Playwright
+ * cobre display, visibility e dimensão zero, mas não opacity — um elemento
+ * com opacity:0 (a técnica mais comum para "só aparece no hover") passa em
+ * toBeVisible() normalmente. Confirmado na prática: com opacity:0 forçado
+ * no título via CSS, toBeVisible() continuou passando. Por isso a opacidade
+ * computada entra como checagem própria.
+ */
+async function estaRealmenteVisivel(locator: Locator) {
+  await expect(locator).toBeVisible()
+  const opacidade = await locator.evaluate((el) => Number(getComputedStyle(el).opacity))
+  expect(opacidade).toBeGreaterThan(0)
+}
 
 test('a home abre com o aviso mais importante no topo', async ({ page }) => {
   await page.goto('/')
@@ -74,10 +88,19 @@ test('filtro combinado sem resultado oferece a saída, e a ficha remove só um f
 
 test('nenhuma informação depende de hover', async ({ page }) => {
   await page.goto('/')
-  // Sem mover o mouse: título, data, resumo e setor já estão visíveis.
-  const primeiraLinha = page.locator('article, a').filter({ hasText: 'Edital de monitoria' }).first()
-  await expect(primeiraLinha).toContainText('Edital de monitoria')
-  await expect(primeiraLinha).toContainText('Coordenação de ADS')
+  // toContainText só olha o texto que já está no DOM — passaria mesmo que
+  // o título estivesse escondido atrás de opacity:0 até o hover, que é
+  // exatamente a regressão que este teste existe para pegar. Sem mover o
+  // mouse: título, data, resumo e setor precisam estar visíveis de
+  // verdade, os quatro.
+  const linha = page.locator('a').filter({ hasText: 'Edital de monitoria' }).first()
+
+  await estaRealmenteVisivel(linha.getByRole('heading', { level: 3 }))
+  await estaRealmenteVisivel(linha.locator('time'))
+  await estaRealmenteVisivel(
+    linha.getByText('Doze vagas em seis disciplinas, com bolsa mensal e oito horas semanais.'),
+  )
+  await estaRealmenteVisivel(linha.getByText('Coordenação de ADS'))
 })
 
 test('a navegação por teclado alcança o conteúdo principal', async ({ page }) => {
