@@ -4442,7 +4442,19 @@ A busca full-text em português, os filtros combinados, e as contagens que alime
 - Test: `tests/integracao/busca.test.ts`
 
 **Interfaces:**
-- Consumes: `Filtros` de `@/lib/busca/filtros`; `Db`; `PublicacaoDoMural`
+- Consumes: `Filtros` e `semFiltro` de `@/lib/busca/filtros`; `type Db`; `PublicacaoDoMural`;
+  `semAcento` de `@/lib/publicacoes/slug`; e **três peças compartilhadas que esta tarefa
+  NÃO redefine**: `achatar` e `COM_RELACOES` de `@/lib/publicacoes/achatar`, `paraOrdenacao`
+  e `ordenarMural` de `@/lib/publicacoes/ordenacao`, e `vigente` de
+  `@/lib/publicacoes/consultas`
+
+**Nada aqui é copiado da Tarefa 8.** Este brief foi escrito antes de a Tarefa 8 centralizar
+`achatar`, e o código de exemplo abaixo ainda mostra definições locais de `COM_RELACOES`, de
+`paraOrdenacao` e da condição de vigência. **Todas as três são para importar, não recriar.**
+
+A condição de vigência é a mais importante das três: se o mural e a busca tiverem cópias
+separadas de "está no mural agora", alguém muda uma e as duas telas passam a discordar sobre
+o que está publicado — sem erro, sem aviso, só um aviso que aparece numa e não na outra.
 - Produces:
   - `buscar(db: Db, f: Filtros, agora: Date): Promise<{ itens: PublicacaoDoMural[]; total: number }>`
   - `sugerirSaidas(db: Db, f: Filtros, agora: Date): Promise<{ semPeriodo: number; semTipo: number; semCurso: number }>`
