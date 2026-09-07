@@ -1,42 +1,26 @@
 import { and, count, eq, gt, isNotNull } from 'drizzle-orm'
 import type { Db } from '@/lib/db/client'
 import { publicacoes } from '@/lib/db/schema'
-import { achatar } from '@/lib/publicacoes/achatar'
-import { ordenarMural } from '@/lib/publicacoes/ordenacao'
+import { achatar, COM_RELACOES } from '@/lib/publicacoes/achatar'
+import { ordenarMural, paraOrdenacao } from '@/lib/publicacoes/ordenacao'
 import type { PublicacaoDoMural, TipoPublicacao } from '@/lib/publicacoes/tipos'
 
-const COM_RELACOES = {
-  setor: { columns: { nome: true, slug: true } },
-  cursos: { with: { curso: { columns: { nome: true, sigla: true, slug: true } } } },
-} as const
-
 /**
- * Condição única de "está no mural agora". Usada por toda listagem.
+ * Condição única de "está no mural agora". Usada por toda listagem — inclusive
+ * pela busca (`src/lib/busca/consulta.ts`), para que as duas nunca discordem
+ * sobre o que está publicado.
  *
  * `publicadoEm` entra na condição porque a ordenação depende dele e a coluna
  * é nulável. Uma linha publicada sem data de publicação é dado malformado:
  * some da listagem em silêncio, em vez de derrubar a home com um erro de
  * leitura de nulo. A garantia de escrita virá do painel, no Plano 2.
  */
-function vigente(agora: Date) {
+export function vigente(agora: Date) {
   return and(
     eq(publicacoes.status, 'publicado'),
     isNotNull(publicacoes.publicadoEm),
     gt(publicacoes.expiraEm, agora),
   )
-}
-
-/**
- * `publicadoEm` é opcional no schema (rascunhos não têm data de publicação),
- * então `PublicacaoDoMural.publicadoEm` é `Date | null` no tipo. Mas
- * `vigente()`, acima, já exige `isNotNull(publicacoes.publicadoEm)` — o
- * Drizzle não propaga essa garantia da cláusula WHERE para o tipo da linha
- * devolvida, então esta função só declara, no tipo, o que a consulta já
- * garante em tempo de execução. `ordenarMural` (Tarefa 4) depende de
- * `publicadoEm: Date` não nulo para desempatar por recência.
- */
-function paraOrdenacao(itens: PublicacaoDoMural[]): (PublicacaoDoMural & { publicadoEm: Date })[] {
-  return itens as (PublicacaoDoMural & { publicadoEm: Date })[]
 }
 
 export async function listarMural(

@@ -1,4 +1,5 @@
 import { diasAte } from '@/lib/publicacoes/exibicao'
+import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
 
 export type ItemOrdenavel = {
   tipo: string
@@ -45,4 +46,19 @@ export function ordenarMural<T extends ItemOrdenavel>(itens: readonly T[], agora
 
     return b.publicadoEm.getTime() - a.publicadoEm.getTime()
   })
+}
+
+/**
+ * `publicadoEm` é opcional no schema (rascunhos não têm data de publicação),
+ * então `PublicacaoDoMural.publicadoEm` é `Date | null` no tipo. Quem chama
+ * isto já filtrou por `isNotNull(publicacoes.publicadoEm)` na consulta — o
+ * Drizzle não propaga essa garantia da cláusula WHERE para o tipo da linha
+ * devolvida, então esta função só declara, no tipo, o que a consulta já
+ * garante em tempo de execução. `ordenarMural`, acima, depende de
+ * `publicadoEm: Date` não nulo para desempatar por recência.
+ */
+export function paraOrdenacao(
+  itens: PublicacaoDoMural[],
+): (PublicacaoDoMural & { publicadoEm: Date })[] {
+  return itens as (PublicacaoDoMural & { publicadoEm: Date })[]
 }

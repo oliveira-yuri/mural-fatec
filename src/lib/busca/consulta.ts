@@ -1,30 +1,13 @@
-import { and, asc, desc, eq, gt, inArray, isNotNull, lte, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, lte, or, sql, type SQL } from 'drizzle-orm'
 import { addDays } from 'date-fns'
 import type { Db } from '@/lib/db/client'
 import { cursos, publicacoes, publicacoesCursos } from '@/lib/db/schema'
 import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
-import { achatar } from '@/lib/publicacoes/achatar'
-import { ordenarMural } from '@/lib/publicacoes/ordenacao'
+import { achatar, COM_RELACOES } from '@/lib/publicacoes/achatar'
+import { ordenarMural, paraOrdenacao } from '@/lib/publicacoes/ordenacao'
+import { vigente } from '@/lib/publicacoes/consultas'
 import { semFiltro, type Filtros } from '@/lib/busca/filtros'
 import { semAcento } from '@/lib/publicacoes/slug'
-
-const COM_RELACOES = {
-  setor: { columns: { nome: true, slug: true } },
-  cursos: { with: { curso: { columns: { nome: true, sigla: true, slug: true } } } },
-} as const
-
-/**
- * `publicadoEm` é opcional no schema, então `PublicacaoDoMural.publicadoEm`
- * é `Date | null` no tipo. Mas `condicao()`, acima, já exige
- * `isNotNull(publicacoes.publicadoEm)` — o Drizzle não propaga essa garantia
- * da cláusula WHERE para o tipo da linha devolvida, então esta função só
- * declara, no tipo, o que a consulta já garante em tempo de execução.
- * `ordenarMural` depende de `publicadoEm: Date` não nulo para desempatar por
- * recência. Mesmo padrão de `src/lib/publicacoes/consultas.ts` (Tarefa 8).
- */
-function paraOrdenacao(itens: PublicacaoDoMural[]): (PublicacaoDoMural & { publicadoEm: Date })[] {
-  return itens as (PublicacaoDoMural & { publicadoEm: Date })[]
-}
 
 function limiteDoPeriodo(periodo: Filtros['periodo'], agora: Date): Date | null {
   if (periodo === 'semana') return addDays(agora, 7)
@@ -39,14 +22,11 @@ function limiteDoPeriodo(periodo: Filtros['periodo'], agora: Date): Date | null 
  * ADS.
  */
 async function condicao(db: Db, f: Filtros, agora: Date): Promise<SQL | undefined> {
-  const partes: (SQL | undefined)[] = [
-    eq(publicacoes.status, 'publicado'),
-    // Garante em tempo de execução o que `paraOrdenacao`, abaixo, declara em
-    // tipo: uma publicação com status 'publicado' e sem `publicadoEm` é dado
-    // malformado (mesma decisão de `consultas.ts`, Tarefa 8).
-    isNotNull(publicacoes.publicadoEm),
-    gt(publicacoes.expiraEm, agora),
-  ]
+  // `vigente()` é a condição única de "está no mural agora" (Tarefa 8, em
+  // `consultas.ts`): status publicado, `publicadoEm` presente e não expirado.
+  // Reusar em vez de reescrever garante que o mural e a busca nunca discordem
+  // sobre o que está publicado.
+  const partes: (SQL | undefined)[] = [vigente(agora)]
 
   if (f.tipo) partes.push(eq(publicacoes.tipo, f.tipo))
 
