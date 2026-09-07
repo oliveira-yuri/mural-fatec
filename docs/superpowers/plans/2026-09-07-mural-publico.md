@@ -1045,14 +1045,31 @@ O drizzle-kit cria `busca_tsv` como coluna comum, porque não sabe gerar `GENERA
 ```sql
 ALTER TABLE "publicacoes" ADD COLUMN "busca_tsv" tsvector
   GENERATED ALWAYS AS (
-    setweight(to_tsvector('portuguese', coalesce("titulo", '')), 'A') ||
-    setweight(to_tsvector('portuguese', coalesce("resumo", '')), 'B') ||
-    setweight(to_tsvector('portuguese', coalesce("corpo", '')), 'C')
+    setweight(to_tsvector('portuguese', translate(coalesce("titulo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'A') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("resumo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'B') ||
+    setweight(to_tsvector('portuguese', translate(coalesce("corpo", ''),
+      'áàâãäéèêëíìîïóòôõöúùûüçÁÀÂÃÄÉÈÊËÍÌÎÏÓÒÔÕÖÚÙÛÜÇ',
+      'aaaaaeeeeiiiiooooouuuucAAAAAEEEEIIIIOOOOOUUUUC')), 'C')
   ) STORED;
 --> statement-breakpoint
 ```
 
 O peso A no título faz o título valer mais que o corpo no ranking da busca.
+
+**Por que o `translate`:** o dicionário `portuguese` do Postgres **preserva acentos** —
+`to_tsvector('portuguese','calendário')` devolve `'calendári'`, e buscar `calendario` sem
+acento não acha nada. Aluno brasileiro digita sem acento, então isso quebraria a busca no
+uso principal dela. A extensão `unaccent` resolveria, mas não existe no PGlite e não é
+`IMMUTABLE`, o que a proíbe dentro de coluna gerada. `translate` é `IMMUTABLE`, dispensa
+extensão e se comporta igual no PGlite e no Supabase.
+
+**O que continua sem casar:** o par `-ção`/`-ções`. `inscrições` não acha `inscrição`, nem
+antes nem depois da dobra — limitação do stemmer Snowball, não regressão. Plurais normais
+funcionam: `disciplinas` acha `disciplina`, `estágios` acha `estagio`.
 
 - [ ] **Step 5: Escrever a ajuda de banco de teste**
 
@@ -1200,6 +1217,7 @@ O banco aceita quase tudo, porque as colunas específicas de tipo são opcionais
 **Interfaces:**
 - Consumes: nada
 - Produces:
+  - `semAcento(texto: string): string` — tira acento preservando a letra
   - `gerarSlug(titulo: string): string`
   - `criarSchemaPublicacao(agora: Date)` — devolve o schema Zod; recebe `agora` para que a validação de data futura seja testável sem depender do relógio
   - `type EntradaPublicacao = z.infer<ReturnType<typeof criarSchemaPublicacao>>`
@@ -1209,7 +1227,18 @@ O banco aceita quase tudo, porque as colunas específicas de tipo são opcionais
 ```ts
 // tests/unidade/slug.test.ts
 import { describe, it, expect } from 'vitest'
-import { gerarSlug } from '@/lib/publicacoes/slug'
+import { gerarSlug, semAcento } from '@/lib/publicacoes/slug'
+
+describe('semAcento', () => {
+  it('remove acento preservando a letra', () => {
+    expect(semAcento('Alteração no calendário acadêmico'))
+      .toBe('Alteracao no calendario academico')
+  })
+
+  it('não mexe em texto sem acento', () => {
+    expect(semAcento('monitoria remunerada')).toBe('monitoria remunerada')
+  })
+})
 
 describe('gerarSlug', () => {
   it('remove acentos e deixa em minúsculas', () => {
@@ -1244,10 +1273,17 @@ Expected: FAIL — módulo não encontrado.
 
 ```ts
 // src/lib/publicacoes/slug.ts
+/**
+ * Remove acentos preservando a letra. A Tarefa 14 reusa isto para dobrar o
+ * termo de busca do mesmo jeito que a coluna busca_tsv dobra o conteúdo — se
+ * os dois lados não dobrarem igual, a busca não casa.
+ */
+export function semAcento(texto: string): string {
+  return texto.normalize('NFD').replace(/[̀-ͯ]/g, '')
+}
+
 export function gerarSlug(titulo: string): string {
-  return titulo
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+  return semAcento(titulo)
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
@@ -4288,9 +4324,14 @@ describe('busca textual', () => {
     expect(itens.some((i) => i.titulo.includes('calendário'))).toBe(true)
   })
 
-  it('reduz ao radical: "inscrições" acha "inscrição"', async () => {
-    const { itens } = await buscar(ctx.db, filtros({ q: 'inscrições' }), agora)
+  it('reduz ao radical: "disciplinas" acha "disciplina"', async () => {
+    const { itens } = await buscar(ctx.db, filtros({ q: 'disciplinas' }), agora)
     expect(itens.length).toBeGreaterThan(0)
+  })
+
+  it('acha também o termo digitado COM acento, porque os dois lados dobram', async () => {
+    const { itens } = await buscar(ctx.db, filtros({ q: 'calendário' }), agora)
+    expect(itens.some((i) => i.titulo.includes('calendário'))).toBe(true)
   })
 
   it('não traz publicação vencida', async () => {
@@ -4370,6 +4411,7 @@ import { cursos, publicacoes, publicacoesCursos } from '@/lib/db/schema'
 import type { PublicacaoDoMural } from '@/lib/publicacoes/tipos'
 import { ordenarMural } from '@/lib/publicacoes/ordenacao'
 import { semFiltro, type Filtros } from '@/lib/busca/filtros'
+import { semAcento } from '@/lib/publicacoes/slug'
 
 const COM_RELACOES = {
   setor: { columns: { nome: true, slug: true } },
@@ -4405,7 +4447,7 @@ async function condicao(db: Db, f: Filtros, agora: Date): Promise<SQL | undefine
 
   if (f.q) {
     partes.push(
-      sql`${publicacoes.buscaTsv} @@ websearch_to_tsquery('portuguese', ${f.q})`,
+      sql`${publicacoes.buscaTsv} @@ websearch_to_tsquery('portuguese', ${semAcento(f.q)})`,
     )
   }
 
