@@ -2111,7 +2111,9 @@ export async function listarMural(
     with: COM_RELACOES,
   })
   const ordenadas = ordenarMural(linhas.map(achatar), agora)
-  return limite ? ordenadas.slice(0, limite) : ordenadas
+  // `limite === 0` precisa devolver lista vazia, não a lista inteira.
+  // Um teste ternário sobre o número trata 0 como ausência de limite.
+  return limite === undefined ? ordenadas : ordenadas.slice(0, limite)
 }
 
 export async function listarPorTipo(
