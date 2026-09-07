@@ -1,0 +1,43 @@
+.linha {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 20px;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--regra);
+}
+
+.titulo {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -0.012em;
+  margin: 0 0 4px;
+  transition: color 0.15s ease;
+}
+
+.linha:hover .titulo { color: var(--tijolo); }
+
+.sub { font-size: 14.5px; color: var(--cinza); }
+
+.ate { font-size: 15px; color: var(--cinza); text-align: right; white-space: nowrap; }
+
+.falta {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 11px;
+  border-radius: 6px;
+  white-space: nowrap;
+  background: var(--papel);
+  border: 1px solid var(--regra);
+  color: var(--cinza);
+}
+
+/* O texto já diz "Faltam N dias"; a cor apenas reforça. */
+.falta[data-estado='apertado'] {
+  background: var(--tijolo);
+  border-color: var(--tijolo);
+  color: var(--papel);
+}
+
+.falta[data-estado='vencido'] { opacity: 0.65; }
