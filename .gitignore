@@ -1,0 +1,22 @@
+# dependências
+node_modules/
+.pnp.*
+
+# build
+.next/
+out/
+dist/
+build/
+
+# ambiente
+.env
+.env.local
+.env*.local
+
+# arquivos de trabalho do brainstorming (mockups servidos localmente)
+.superpowers/
+
+# sistema
+.DS_Store
+Thumbs.db
+*.log
