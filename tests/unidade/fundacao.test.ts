@@ -9,6 +9,7 @@ describe('tokens de design', () => {
     ['--ardosia-escura', '#33454E'],
     ['--tijolo', '#B22D30'],
     ['--tijolo-escuro', '#8E2326'],
+    ['--tijolo-claro', '#F3B9BA'],
     ['--tinta', '#1E272C'],
     ['--cinza', '#5A6A72'],
     ['--regra', '#D5DBDE'],
