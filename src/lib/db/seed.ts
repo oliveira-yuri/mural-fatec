@@ -1,14 +1,7 @@
 import { addDays, subDays } from 'date-fns'
-import type { PgDatabase, PgQueryResultHKT } from 'drizzle-orm/pg-core'
+import type { Db } from './client'
 import { cursos, publicacoes, publicacoesCursos, setores, usuarios } from './schema'
 import { gerarSlug } from '@/lib/publicacoes/slug'
-import type * as schema from './schema'
-
-// Aceita qualquer driver Postgres do drizzle (postgres-js em produção, PGlite
-// nos testes de integração). `Db`, de ./client, é específico do driver
-// postgres-js — usá-lo aqui reprovaria o banco de teste no typecheck sem
-// mudar nada em runtime.
-type Db = PgDatabase<PgQueryResultHKT, typeof schema>
 
 // Confirmar esta lista com a unidade antes da entrega (seção 16 da spec).
 const CURSOS = [
