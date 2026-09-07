@@ -74,4 +74,28 @@ describe('EstadoVazio', () => {
     expect(screen.queryByRole('link', { name: /Incluir outros tipos/ })).not.toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Ver todos os cursos/ })).toBeInTheDocument()
   })
+
+  it('usa artigo e substantivo certos quando não há filtro de tipo', () => {
+    render(
+      <EstadoVazio
+        filtros={{ ...FILTROS_PADRAO, curso: 'si', periodo: 'semana' }}
+        nomesDeCurso={NOMES}
+        saidas={{ semPeriodo: 1, semTipo: 0, semCurso: 1 }}
+      />,
+    )
+    expect(screen.getByRole('heading', { level: 2 }))
+      .toHaveTextContent('Nenhuma publicação de Segurança da Informação nesta semana')
+  })
+
+  it('usa o gênero certo para notícia', () => {
+    render(
+      <EstadoVazio
+        filtros={{ ...FILTROS_PADRAO, tipo: 'noticia', curso: 'si', periodo: 'semana' }}
+        nomesDeCurso={NOMES}
+        saidas={{ semPeriodo: 1, semTipo: 0, semCurso: 1 }}
+      />,
+    )
+    expect(screen.getByRole('heading', { level: 2 }))
+      .toHaveTextContent('Nenhuma notícia de Segurança da Informação nesta semana')
+  })
 })

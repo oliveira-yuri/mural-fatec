@@ -1,6 +1,9 @@
+import { addDays, subDays } from 'date-fns'
+import { eq } from 'drizzle-orm'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { criarBancoDeTeste } from './ajuda/banco'
 import { semear } from '@/lib/db/seed'
+import { cursos, publicacoes, publicacoesCursos, setores, usuarios } from '@/lib/db/schema'
 import { buscar, sugerirSaidas, listarCursos } from '@/lib/busca/consulta'
 import { FILTROS_PADRAO, type Filtros } from '@/lib/busca/filtros'
 
@@ -89,6 +92,45 @@ describe('sugerirSaidas', () => {
     expect(s.semPeriodo).toBeGreaterThanOrEqual(0)
     expect(s.semTipo).toBeGreaterThanOrEqual(s.semPeriodo === 0 ? 0 : 0)
     expect(typeof s.semCurso).toBe('number')
+  })
+
+  it('semPeriodo conta por "qualquer data", não pelo padrão de 30 dias', async () => {
+    // Fixture só para este teste: um prazo de SI além do teto de 30 dias.
+    // O seed compartilhado não tem nenhum evento ou prazo além de 30 dias,
+    // então sem esta linha extra não dá para distinguir "conta certo" de
+    // "conta errado, mas coincidentemente zero".
+    const [setor] = await ctx.db.select().from(setores).limit(1)
+    const [autor] = await ctx.db.select().from(usuarios).limit(1)
+    const [si] = await ctx.db.select().from(cursos).where(eq(cursos.sigla, 'SI'))
+
+    const [prazoDistante] = await ctx.db
+      .insert(publicacoes)
+      .values({
+        slug: 'prazo-de-si-alem-do-teto-padrao',
+        tipo: 'prazo',
+        titulo: 'Prazo de SI além do teto padrão',
+        resumo: 'Fixture só para este teste.',
+        corpo: 'Usado para provar que sugerirSaidas conta por "qualquer data", não pelo padrão de 30 dias.',
+        setorId: setor.id,
+        autorId: autor.id,
+        status: 'publicado',
+        prazoFinal: addDays(agora, 45),
+        publicadoEm: subDays(agora, 1),
+        expiraEm: addDays(agora, 45),
+      })
+      .returning()
+
+    await ctx.db.insert(publicacoesCursos).values({ publicacaoId: prazoDistante.id, cursoId: si.id })
+
+    // Dentro do padrão de 30 dias (o filtro nem menciona período — é o
+    // valor padrão de FILTROS_PADRAO) não há nenhum prazo de SI: zero.
+    const f: Filtros = { ...FILTROS_PADRAO, tipo: 'prazo', curso: 'seguranca-da-informacao' }
+    expect((await buscar(ctx.db, f, agora)).total).toBe(0)
+
+    // Mas existe um prazo de SI mais adiante, e é exatamente o que o link
+    // "Ver qualquer data" promete mostrar — a contagem tem que bater.
+    const s = await sugerirSaidas(ctx.db, f, agora)
+    expect(s.semPeriodo).toBeGreaterThan(0)
   })
 })
 

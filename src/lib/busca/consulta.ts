@@ -104,7 +104,11 @@ export async function sugerirSaidas(
   agora: Date,
 ): Promise<{ semPeriodo: number; semTipo: number; semCurso: number }> {
   const [semPeriodo, semTipo, semCurso] = await Promise.all([
-    buscar(db, semFiltro(f, 'periodo'), agora),
+    // 'qualquer', e não semFiltro: o link da tela vazia leva para "qualquer
+    // data", enquanto semFiltro devolve o período ao padrão de 30 dias. Com o
+    // padrão já ativo, semFiltro vira no-op, a contagem repete o zero da busca
+    // atual, e a saída some da tela mesmo havendo resultado mais adiante.
+    buscar(db, { ...f, periodo: 'qualquer' }, agora),
     buscar(db, semFiltro(f, 'tipo'), agora),
     buscar(db, semFiltro(f, 'curso'), agora),
   ])

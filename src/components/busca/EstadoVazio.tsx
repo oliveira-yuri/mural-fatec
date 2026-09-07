@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { escreverFiltros, semFiltro, type Filtros, type Periodo } from '@/lib/busca/filtros'
-import { ROTULO_TIPO } from '@/lib/publicacoes/tipos'
+import type { TipoPublicacao } from '@/lib/publicacoes/tipos'
 import css from './EstadoVazio.module.css'
 
 // Frase usada dentro do título ("nesta semana", não "esta semana"): o rótulo
@@ -11,6 +11,21 @@ const FRASE_PERIODO: Record<Periodo, string> = {
   trinta: 'nos próximos 30 dias',
   qualquer: '',
 }
+
+/**
+ * Como cada tipo aparece numa frase, com o artigo certo. Não dá para derivar
+ * de ROTULO_TIPO: ele é rótulo de seção ("Comunidade"), e "Nenhuma comunidade
+ * de ADS" não é português. O gênero também não é adivinhável — sem isto a
+ * tela mais comum de resultado zero dizia "Nenhum publicação".
+ */
+const NA_FRASE: Record<TipoPublicacao, { artigo: string; nome: string }> = {
+  aviso: { artigo: 'Nenhum', nome: 'aviso' },
+  evento: { artigo: 'Nenhum', nome: 'evento' },
+  prazo: { artigo: 'Nenhum', nome: 'prazo' },
+  noticia: { artigo: 'Nenhuma', nome: 'notícia' },
+}
+
+const SEM_TIPO = { artigo: 'Nenhuma', nome: 'publicação' }
 
 function href(f: Filtros): string {
   const qs = escreverFiltros(f)
@@ -26,12 +41,12 @@ export function EstadoVazio({
   nomesDeCurso: Record<string, string>
   saidas: { semPeriodo: number; semTipo: number; semCurso: number }
 }) {
-  const singular = filtros.tipo ? ROTULO_TIPO[filtros.tipo].toLowerCase() : 'publicação'
-  const plural = filtros.tipo ? `${singular}s` : 'publicações'
+  const { artigo, nome: nomeTipo } = filtros.tipo ? NA_FRASE[filtros.tipo] : SEM_TIPO
+  const plural = filtros.tipo ? `${nomeTipo}s` : 'publicações'
   const nomeCurso = filtros.curso ? nomesDeCurso[filtros.curso] ?? filtros.curso : null
 
   const titulo = [
-    `Nenhum ${singular}`,
+    `${artigo} ${nomeTipo}`,
     nomeCurso ? `de ${nomeCurso}` : null,
     filtros.q ? `para “${filtros.q}”` : null,
     filtros.periodo !== 'qualquer' ? FRASE_PERIODO[filtros.periodo] : null,
