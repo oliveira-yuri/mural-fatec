@@ -2777,6 +2777,11 @@ describe('CardEvento', () => {
     expect(screen.getByAltText('Plateia no auditório do Bloco B')).toBeInTheDocument()
   })
 
+  it('mostra "0 restantes" quando o evento lotou, em vez de omitir', () => {
+    render(<CardEvento publicacao={criarPublicacao({ ...evento, vagasRestantes: 0 })} />)
+    expect(screen.getByText('0 restantes')).toBeInTheDocument()
+  })
+
   it('omite a linha de vagas quando o número não foi informado', () => {
     render(<CardEvento publicacao={criarPublicacao({ ...evento, vagasRestantes: null })} />)
     expect(screen.queryByText(/restantes/)).not.toBeInTheDocument()
@@ -2828,6 +2833,7 @@ describe('NotaComunidade', () => {
     titulo: 'Equipe de ADS fica em terceiro na Maratona',
     resumo: 'Vaga garantida na final nacional.',
     pessoasCitadas: 'Marcela Tsuchiya, Ithalo Bandeira e Renan Sposito',
+    creditoFoto: 'Assessoria de Comunicação',
     imagemUrl: 'https://exemplo.org/equipe.jpg',
     imagemAlt: 'Três estudantes com o certificado',
   })
@@ -2837,6 +2843,17 @@ describe('NotaComunidade', () => {
     expect(screen.getByAltText('Três estudantes com o certificado')).toBeInTheDocument()
     expect(screen.getByText('Vaga garantida na final nacional.')).toBeInTheDocument()
     expect(screen.getByText(/Marcela Tsuchiya/)).toBeInTheDocument()
+  })
+
+  it('na variante destaque, mostra o crédito da fotografia', () => {
+    render(<NotaComunidade publicacao={nota} variante="destaque" />)
+    expect(screen.getByText('Foto: Assessoria de Comunicação')).toBeInTheDocument()
+  })
+
+  it('omite o crédito quando a foto não tem um', () => {
+    const semCredito = criarPublicacao({ ...nota, creditoFoto: null })
+    render(<NotaComunidade publicacao={semCredito} variante="destaque" />)
+    expect(screen.queryByText(/^Foto:/)).not.toBeInTheDocument()
   })
 
   it('na variante compacta, mostra só manchete e procedência', () => {
@@ -3181,7 +3198,14 @@ export function NotaComunidade({
   return (
     <a className={css.destaque} href={href}>
       {publicacao.imagemUrl ? (
-        <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+        <figure className={css.figura}>
+          <img className={css.foto} src={publicacao.imagemUrl} alt={publicacao.imagemAlt ?? ''} />
+          {publicacao.creditoFoto ? (
+            <figcaption className={`narrow ${css.creditoFoto}`}>
+              Foto: {publicacao.creditoFoto}
+            </figcaption>
+          ) : null}
+        </figure>
       ) : null}
       <h3 className={css.titulo}>{publicacao.titulo}</h3>
       <p className={`narrow ${css.resumo}`}>{publicacao.resumo}</p>
@@ -3200,6 +3224,12 @@ export function NotaComunidade({
 ```css
 /* src/components/mural/NotaComunidade.module.css */
 .destaque { display: block; }
+
+.figura { margin: 0; }
+
+/* Crédito de fotografia: a spec §6 o nomeia como traço definidor da
+   notícia — é o único tipo que carrega crédito de foto. */
+.creditoFoto { font-size: 12.5px; color: var(--cinza); margin: 7px 0 0; }
 
 .foto {
   width: 100%;
