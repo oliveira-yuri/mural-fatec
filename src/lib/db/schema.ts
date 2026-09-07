@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm'
 import {
   boolean, customType, index, integer, jsonb, pgEnum, pgTable,
   primaryKey, text, timestamp, uniqueIndex, uuid,
@@ -100,3 +101,20 @@ export const publicacoesCursos = pgTable(
   },
   (t) => [primaryKey({ columns: [t.publicacaoId, t.cursoId] })],
 )
+
+export const relacoesPublicacoes = relations(publicacoes, ({ one, many }) => ({
+  setor: one(setores, { fields: [publicacoes.setorId], references: [setores.id] }),
+  autor: one(usuarios, { fields: [publicacoes.autorId], references: [usuarios.id] }),
+  cursos: many(publicacoesCursos),
+}))
+
+export const relacoesPublicacoesCursos = relations(publicacoesCursos, ({ one }) => ({
+  publicacao: one(publicacoes, {
+    fields: [publicacoesCursos.publicacaoId],
+    references: [publicacoes.id],
+  }),
+  curso: one(cursos, {
+    fields: [publicacoesCursos.cursoId],
+    references: [cursos.id],
+  }),
+}))
