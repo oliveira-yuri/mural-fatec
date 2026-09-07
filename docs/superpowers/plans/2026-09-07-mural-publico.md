@@ -31,6 +31,7 @@ Requisitos que valem para **todas** as tarefas. Valores copiados da spec.
 | `--regra` | `#D5DBDE` |
 | `--lavado` | `#F2F4F5` |
 | `--papel` | `#FFFFFF` |
+| `--tijolo-claro` | `#F3B9BA` | o tijolo clareado, para texto de marca sobre fundo escuro |
 
 **Tipografia** — Archivo para títulos, navegação, botões e rótulos; Archivo Narrow para listas densas (datas, resumos de linha, metadados, rodapé). Carregadas por `next/font/google`, nunca por `<link>` ou `@import`.
 
@@ -181,6 +182,7 @@ describe('tokens de design', () => {
     ['--ardosia-escura', '#33454E'],
     ['--tijolo', '#B22D30'],
     ['--tijolo-escuro', '#8E2326'],
+    ['--tijolo-claro', '#F3B9BA'],
     ['--tinta', '#1E272C'],
     ['--cinza', '#5A6A72'],
     ['--regra', '#D5DBDE'],
@@ -240,6 +242,11 @@ Expected: FAIL — `globals.css` ainda tem o conteúdo padrão do create-next-ap
   --ardosia-escura: #33454E;
   --tijolo: #B22D30;
   --tijolo-escuro: #8E2326;
+  /* O tijolo clareado, legível sobre a ardósia escura. Existe porque o
+     vermelho institucional cheio não tem contraste suficiente em fundo
+     escuro, e sem ele a linha de identificação do hero vira branco
+     comum e perde o vínculo com a marca. */
+  --tijolo-claro: #F3B9BA;
   --tinta: #1E272C;
   --cinza: #5A6A72;
   --regra: #D5DBDE;
@@ -3514,7 +3521,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 
 .caixa { max-width: 614px; border-left: 4px solid var(--tijolo); padding-left: 22px; }
 
-.identificacao { font-size: 12.5px; font-weight: 600; color: #f3b9ba; margin: 0 0 12px; }
+.identificacao { font-size: 12.5px; font-weight: 600; color: var(--tijolo-claro); margin: 0 0 12px; }
 
 .titulo {
   font-size: 38px;
@@ -3550,7 +3557,7 @@ export function Hero({ publicacao }: { publicacao: PublicacaoDoMural }) {
 
 .claro { background: var(--papel); color: var(--ardosia-escura); }
 
-.claro:hover { background: #dfe5e8; }
+.claro:hover { background: var(--regra); }
 ```
 
 - [ ] **Step 6: Escrever a home**
