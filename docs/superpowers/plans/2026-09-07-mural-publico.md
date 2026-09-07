@@ -3762,10 +3762,26 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 Quatro rotas de listagem que compartilham um componente, e a página individual — que continua acessível mesmo depois de a publicação sair do mural.
 
 **Files:**
-- Create: `src/components/mural/ListagemPorTipo.tsx`
+- Create: `src/components/mural/ListagemPorTipo.tsx` (busca) e `ListaDeSecao.tsx` (desenha)
 - Create: `src/app/avisos/page.tsx`, `src/app/eventos/page.tsx`, `src/app/prazos/page.tsx`, `src/app/comunidade/page.tsx`
-- Create: `src/app/p/[slug]/page.tsx` + `pagina.module.css`
-- Test: `tests/integracao/rotas.test.ts`
+- Create: `src/app/p/[slug]/page.tsx` (busca) + `pagina.module.css`
+- Create: `src/components/mural/ArtigoPublicacao.tsx` (desenha)
+- Test: `tests/integracao/rotas.test.ts`, `tests/unidade/listagem-e-artigo.test.tsx`
+
+**Separação que torna a interface testável.** Um Server Component assíncrono que
+busca no banco não pode ser renderizado num teste de unidade. Por isso cada
+página se divide em duas peças: a assíncrona busca os dados e delega, e a pura
+recebe tudo por props e desenha. É a mesma lição de `montarSecoesDaHome`: o que
+não é testável isoladamente é o que passa despercebido.
+
+- `ListagemPorTipo` busca e chama `<ListaDeSecao itens tipo agora />`.
+- A página `/p/[slug]` busca, trata `notFound()` e chama
+  `<ArtigoPublicacao publicacao agora />`.
+
+Os testes de renderização usam `criarPublicacao` da Tarefa 10 e cobrem, no
+mínimo: o aviso "saiu do mural" aparecendo quando vencida e ausente quando
+vigente; a ordem renderizada em cada tipo de listagem; e a listagem vazia
+mostrando a frase em vez de nada.
 
 **Interfaces:**
 - Consumes: `listarPorTipo`, `buscarPorSlug` de `@/lib/publicacoes/consultas`; componentes da Task 10
