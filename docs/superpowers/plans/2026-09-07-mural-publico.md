@@ -5217,6 +5217,35 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 ---
 
+### Task 15b: Banco em memória para desenvolvimento
+
+Sem isto, `npm run dev` não sobe e a Tarefa 16 não tem contra o que rodar. Também
+é o que faz alguém clonar o repositório e ver o mural funcionando sem instalar
+nada — que para uma entrega acadêmica vale por si.
+
+**Files:**
+- Create: `src/lib/db/migrar.ts`
+- Modify: `src/lib/db/client.ts`, `src/lib/db/seed.ts`
+- Modify: `tests/integracao/ajuda/banco.ts` (passa a usar o módulo compartilhado)
+- Modify: os quatro consumidores de `db` — `src/app/page.tsx`,
+  `src/app/buscar/page.tsx`, `src/app/p/[slug]/page.tsx`,
+  `src/components/mural/ListagemPorTipo.tsx`
+
+**Como funciona.** `client.ts` deixa de exportar um `db` pronto e passa a exportar
+`obterDb(): Promise<Db>`, memoizada. Com `DATABASE_URL` real, ela devolve a
+conexão postgres-js de sempre. Sem ela — ou com o placeholder do `.env.example` —
+ela sobe um PGlite em memória, aplica as migrações, semeia, e **avisa em voz alta
+no console** que aquilo é banco de desenvolvimento e os dados somem ao reiniciar.
+
+Isso só é possível porque `Db` já é independente de driver desde a Tarefa 7.
+
+**A rotina que aplica migrações sai do arquivo de teste** e vira
+`src/lib/db/migrar.ts`, usada pelos dois. Quatro vezes neste plano uma definição
+acabou duplicada entre tarefas; esta é a quinta candidata e não vai ser.
+
+**O que NÃO fazer:** nada de fallback silencioso. Se o aviso não aparecer, alguém
+vai achar que está olhando dados de produção.
+
 ### Task 16: Testes de ponta a ponta
 
 Os percursos de leitura, num navegador de verdade, contra o banco semeado.
