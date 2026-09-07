@@ -1,0 +1,19 @@
+.vazio { padding: 46px 0 50px; text-align: center; }
+
+.titulo { font-size: 21px; font-weight: 600; color: var(--ardosia); margin: 0 0 9px; }
+
+.linha { font-size: 15px; line-height: 1.6; color: var(--cinza); margin: 0 auto 20px; max-width: 52ch; }
+
+.saidas { display: flex; gap: 9px; justify-content: center; flex-wrap: wrap; }
+
+.saidas a {
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 13px;
+  border-radius: var(--raio-controle);
+  border: 1px solid var(--regra);
+  color: var(--ardosia);
+  background: var(--papel);
+}
+
+.saidas a:hover { border-color: var(--ardosia); }

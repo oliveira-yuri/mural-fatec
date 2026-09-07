@@ -1,0 +1,36 @@
+.barra { background: var(--lavado); border-bottom: 1px solid var(--regra); padding: 16px 0; }
+
+.campos { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+
+.campo { display: flex; flex-direction: column; gap: 5px; margin: 0; }
+
+.campo label { font-size: 12px; font-weight: 500; color: var(--cinza); }
+
+.campo input,
+.campo select {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  border: 1px solid var(--regra);
+  border-radius: var(--raio-controle);
+  background: var(--papel);
+  color: var(--tinta);
+  min-width: 184px;
+}
+
+.termo { min-width: 290px; }
+
+.enviar {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 18px;
+  border: 0;
+  border-radius: var(--raio-controle);
+  background: var(--ardosia);
+  color: var(--papel);
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.enviar:hover { background: var(--ardosia-escura); }
