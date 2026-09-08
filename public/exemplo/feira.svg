@@ -1,0 +1,22 @@
+<svg width="900" height="600" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustracao de estandes montados lado a lado num patio coberto">
+  <rect width="900" height="600" fill="#3E5462"/>
+  <rect y="430" width="900" height="170" fill="#2C3C45"/>
+  <rect x="80" y="250" width="200" height="185" fill="#F2F4F5" opacity="0.9"/>
+  <path d="M64 250 L296 250 L280 202 L80 202 Z" fill="#B22D30"/>
+  <rect x="112" y="300" width="136" height="14" rx="7" fill="#475D68" opacity="0.5"/>
+  <rect x="112" y="330" width="96" height="14" rx="7" fill="#475D68" opacity="0.32"/>
+  <rect x="350" y="250" width="200" height="185" fill="#F2F4F5" opacity="0.9"/>
+  <path d="M334 250 L566 250 L550 202 L350 202 Z" fill="#475D68"/>
+  <rect x="382" y="300" width="136" height="14" rx="7" fill="#475D68" opacity="0.5"/>
+  <rect x="382" y="330" width="110" height="14" rx="7" fill="#475D68" opacity="0.32"/>
+  <rect x="620" y="250" width="200" height="185" fill="#F2F4F5" opacity="0.9"/>
+  <path d="M604 250 L836 250 L820 202 L620 202 Z" fill="#B22D30"/>
+  <rect x="652" y="300" width="136" height="14" rx="7" fill="#475D68" opacity="0.5"/>
+  <rect x="652" y="330" width="82" height="14" rx="7" fill="#475D68" opacity="0.32"/>
+  <g fill="#26343B" opacity="0.72">
+    <circle cx="200" cy="500" r="21"/><rect x="182" y="524" width="36" height="60" rx="16"/>
+    <circle cx="470" cy="512" r="21"/><rect x="452" y="536" width="36" height="60" rx="16"/>
+    <circle cx="700" cy="498" r="21"/><rect x="682" y="522" width="36" height="60" rx="16"/>
+  </g>
+  <text x="866" y="578" font-family="system-ui, Arial, sans-serif" font-size="13" fill="#F2F4F5" opacity="0.32" letter-spacing="2" text-anchor="end">IMAGEM DE EXEMPLO</text>
+</svg>

@@ -74,8 +74,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         // duas rodadas seguidas de bug no Hero passaram batido nos testes
         // de ponta a ponta por nenhuma publicação do seed ter imagem — o
         // caminho "com foto" nunca era exercitado de verdade.
-        imagemUrl: '/exemplo/imagem-exemplo.svg',
-        imagemAlt: 'Ilustração de exemplo em tom de ardósia, usada como imagem de capa deste aviso.',
+        imagemUrl: '/exemplo/campus.svg',
+        imagemAlt: 'Ilustração do pátio do campus ao entardecer, com os blocos de salas ao fundo.',
         publicadoEm: subDays(agora, 3),
         expiraEm: addDays(agora, 27),
       },
@@ -105,8 +105,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         local: 'Auditório do Bloco B',
         modalidade: 'presencial',
         vagasRestantes: 23,
-        imagemUrl: '/exemplo/imagem-exemplo.svg',
-        imagemAlt: 'Ilustração de exemplo em tom de ardósia, usada como imagem de capa deste evento.',
+        imagemUrl: '/exemplo/auditorio.svg',
+        imagemAlt: 'Ilustração de plateia no auditório voltada para um palco iluminado.',
         publicadoEm: subDays(agora, 6),
         expiraEm: addDays(agora, 22),
       },
@@ -117,6 +117,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         titulo: 'Feira de estágios e primeiro emprego',
         resumo: 'Dezenove empresas da região recebem currículos e entrevistam no mesmo dia.',
         corpo: 'Levar currículo impresso. Não é preciso se inscrever.',
+        imagemUrl: '/exemplo/feira.svg',
+        imagemAlt: 'Ilustração de estandes de empresas montados lado a lado no pátio coberto.',
         setorId: porSetor('Direção'),
         inicioEm: addDays(agora, 24),
         fimEm: addDays(agora, 24),
@@ -156,6 +158,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         titulo: 'Equipe de ADS fica em terceiro na Maratona de Programação',
         resumo: 'Os três alunos garantiram vaga na final nacional, em novembro.',
         corpo: 'A equipe disputou a etapa regional contra 112 equipes.',
+        imagemUrl: '/exemplo/equipe.svg',
+        imagemAlt: 'Ilustração de três estudantes lado a lado segurando um certificado.',
         setorId: porSetor('Coordenação de ADS'),
         pessoasCitadas: 'Marcela Tsuchiya, Ithalo Bandeira e Renan Sposito',
         creditoFoto: 'Assessoria de Comunicação',
@@ -169,6 +173,8 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
         titulo: 'Campanha de doação de sangue reúne 84 voluntários',
         resumo: 'A ação do centro acadêmico ocupou o pátio coberto por dois dias.',
         corpo: 'O hemocentro recebeu doadores de todos os cursos e períodos.',
+        imagemUrl: '/exemplo/doacao.svg',
+        imagemAlt: 'Ilustração de voluntários em fila numa campanha de doação de sangue.',
         setorId: porSetor('Centro Acadêmico'),
         publicadoEm: subDays(agora, 32),
         expiraEm: addDays(agora, 58),
@@ -208,7 +214,17 @@ export async function semear(db: Db, agora: Date = new Date()): Promise<void> {
 
 // Execução direta: npm run db:seed
 if (process.argv[1]?.includes('seed')) {
-  import('./client').then(({ obterDb, precisaDeBancoEmMemoria }) => {
+  // Carrega .env.local como o drizzle.config.ts faz. Sem isto o comando
+  // enxerga o ambiente sem DATABASE_URL e recusa rodar, mesmo com o arquivo
+  // ali do lado — que era o que o README mandava fazer.
+  //
+  // Encadeado, e não `await`: o tsx compila este arquivo para CommonJS, que
+  // não aceita await no nível superior. E o import não pode subir para o topo
+  // do módulo, senão os testes que importam `semear` passariam a carregar o
+  // .env.local e rodariam contra o banco de produção.
+  Promise.all([import('dotenv'), import('./client')]).then(([{ config }, cliente]) => {
+    config({ path: '.env.local' })
+    const { obterDb, precisaDeBancoEmMemoria } = cliente
     // Sem DATABASE_URL real, obterDb() já sobe e semeia um banco em memória
     // sozinho (é para isto que ele existe) — e este processo o descartaria
     // no instante seguinte, ao sair. Semear por linha de comando só faz
